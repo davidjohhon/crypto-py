@@ -1,18 +1,22 @@
-# CryptoPy API Reference
+<p align="center">
+  <a href="index.md">🇬🇧 English</a>
+</p>
 
-## Import
+# CryptoPy 完整 API 文档
+
+## 导入
 
 ```python
 import CryptoPy
 ```
 
-All APIs are accessed through the `CryptoPy` namespace, following CryptoJS conventions.
+所有 API 通过 `CryptoPy` 命名空间直接访问，风格与 CryptoJS 完全一致。
 
 ---
 
-## Hash Algorithms
+## 哈希算法
 
-### Basic Usage
+### 基础用法
 
 ```python
 CryptoPy.MD5("Message")
@@ -25,24 +29,24 @@ CryptoPy.SHA3("Message", {"outputLength": 256})
 CryptoPy.RIPEMD160("Message")
 ```
 
-**Input**: `str` or `WordArray`.
+**输入**: `str` 或 `WordArray`。
 
-**Output**: `WordArray`. Use `str()` or `.toString()` for hex string.
+**输出**: `WordArray`。`str()` 或 `.toString()` 得到 hex 字符串。
 
 ```python
 h = CryptoPy.SHA256("Message")
 print(h)                             # hex
 h.toString(CryptoPy.enc.Base64)      # Base64
-h.toString(CryptoPy.enc.Hex)         # Hex (default)
+h.toString(CryptoPy.enc.Hex)         # Hex（默认）
 ```
 
-### SHA3 Note
+### SHA3 说明
 
-> SHA3 implements raw **Keccak[c=2d]** (matching CryptoJS), **NOT** the FIPS 202 standardized SHA-3.
-> The difference is the domain separation byte: Keccak uses `0x01`, FIPS 202 SHA-3 uses `0x06`.
-> `CryptoPy.SHA3("")` ≠ `hashlib.sha3_512(b"")`.
+> SHA3 实现的是原始 **Keccak[c=2d]**（与 CryptoJS 一致），**非** FIPS 202 标准的 SHA-3。
+> 两者区别在于填充前的域分隔字节：Keccak 使用 `0x01`，FIPS 202 SHA-3 使用 `0x06`。
+> 即 `CryptoPy.SHA3("")` ≠ `hashlib.sha3_512(b"")`。
 
-### Progressive Hashing
+### 渐进式哈希
 
 ```python
 sha256 = CryptoPy.algo.SHA256.create()
@@ -50,25 +54,25 @@ sha256.update("Message Part 1")
 sha256.update("Message Part 2")
 hash = sha256.finalize("Message Part 3")
 
-# Equivalent to:
+# 等价于：
 CryptoPy.SHA256("Message Part 1Message Part 2Message Part 3")
 ```
 
-### Clone Hash State
+### 克隆哈希状态
 
 ```python
 sha256 = CryptoPy.algo.SHA256.create()
 sha256.update("a")
-clone = sha256.clone()
-clone.finalize()                      # SHA256("a")
-sha256.update("b").finalize()         # SHA256("ab")
+clone = sha256.clone()      # 复制当前状态
+clone.finalize()             # SHA256("a")
+sha256.update("b").finalize()  # SHA256("ab")
 ```
 
 ---
 
 ## HMAC
 
-### Basic Usage
+### 基础用法
 
 ```python
 CryptoPy.HmacMD5("message", "key")
@@ -81,7 +85,7 @@ CryptoPy.HmacSHA3("message", "key")
 CryptoPy.HmacRIPEMD160("message", "key")
 ```
 
-### Progressive HMAC
+### 渐进式 HMAC
 
 ```python
 hmac = CryptoPy.algo.HMAC.create(CryptoPy.algo.SHA256, "Secret Key")
@@ -92,23 +96,23 @@ hmac.finalize("Message Part 3")
 
 ---
 
-## Ciphers
+## 加密算法
 
 ### AES
 
 ```python
-# Password-based (auto key/IV derivation)
+# 密码加密（自动派生 Key 和 IV）
 enc = CryptoPy.AES.encrypt("Message", "Secret Passphrase")
 dec = CryptoPy.AES.decrypt(enc, "Secret Passphrase")
 CryptoPy.enc.Utf8.stringify(dec)
 
-# Custom Key and IV
+# 自定义 Key 和 IV
 key = CryptoPy.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
 iv  = CryptoPy.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
 enc = CryptoPy.AES.encrypt("Message", key, {"iv": iv})
 dec = CryptoPy.AES.decrypt(enc, key, {"iv": iv})
 
-# Custom mode and padding
+# 指定模式和填充
 CryptoPy.AES.encrypt("Message", "password", {
     "mode": CryptoPy.mode.ECB,
     "padding": CryptoPy.pad.ZeroPadding,
@@ -125,19 +129,19 @@ CryptoPy.RC4.encrypt("Message", "Key")
 CryptoPy.RC4Drop.encrypt("Message", "Key", {"drop": 3072 // 4})
 ```
 
-### Progressive Encryption
+### 渐进式加密
 
 ```python
 key = CryptoPy.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
 iv  = CryptoPy.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
 
-# Encrypt
+# 加密
 enc = CryptoPy.algo.AES.createEncryptor(key, {"iv": iv})
 c1 = enc.process("Message Part 1")
 c2 = enc.process("Message Part 2")
 c3 = enc.finalize("Message Part 3")
 
-# Decrypt
+# 解密
 dec = CryptoPy.algo.AES.createDecryptor(key, {"iv": iv})
 p1 = dec.process(c1)
 p2 = dec.process(c2)
@@ -148,10 +152,10 @@ CryptoPy.enc.Utf8.stringify(p1.clone().concat(p2).concat(p3).concat(p4))
 
 ---
 
-## Block Cipher Modes
+## 块密码模式
 
-| Mode | Description | Default |
-|------|-------------|---------|
+| 模式 | 描述 | 默认 |
+|------|------|------|
 | `CryptoPy.mode.CBC` | Cipher Block Chaining | ✓ |
 | `CryptoPy.mode.CFB` | Cipher Feedback | |
 | `CryptoPy.mode.CTR` | Counter | |
@@ -164,16 +168,16 @@ CryptoPy.AES.encrypt("Message", "password", {"mode": CryptoPy.mode.CTR})
 
 ---
 
-## Padding Schemes
+## 填充方案
 
-| Scheme | Description | Default |
-|--------|-------------|---------|
+| 方案 | 描述 | 默认 |
+|------|------|------|
 | `CryptoPy.pad.Pkcs7` | PKCS #5/#7 | ✓ |
 | `CryptoPy.pad.AnsiX923` | ANSI X.923 | |
-| `CryptoPy.pad.Iso10126` | ISO 10126 (random) | |
+| `CryptoPy.pad.Iso10126` | ISO 10126（随机填充） | |
 | `CryptoPy.pad.Iso97971` | ISO/IEC 9797-1 | |
-| `CryptoPy.pad.ZeroPadding` | Zero padding | |
-| `CryptoPy.pad.NoPadding` | No padding | |
+| `CryptoPy.pad.ZeroPadding` | 补零 | |
+| `CryptoPy.pad.NoPadding` | 无填充 | |
 
 ```python
 CryptoPy.AES.encrypt("Message", "password", {"padding": CryptoPy.pad.Iso97971})
@@ -181,7 +185,7 @@ CryptoPy.AES.encrypt("Message", "password", {"padding": CryptoPy.pad.Iso97971})
 
 ---
 
-## Encoders
+## 编码器
 
 ```python
 CryptoPy.enc.Hex.parse("48656c6c6f")
@@ -198,25 +202,25 @@ CryptoPy.enc.Utf16LE.parse("Hello")
 
 ---
 
-## Key Derivation
+## 密钥派生
 
 ### PBKDF2
 
 ```python
-# Default (SHA256, 250000 iterations, 128-bit key)
+# 默认（SHA256, 250000 次迭代, 128 位密钥）
 key = CryptoPy.PBKDF2("password", "salt")
 
-# Full parameters
+# 完整参数（指定迭代数以加快测试）
 key = CryptoPy.PBKDF2("password", "salt", {
-    "keySize": 256 // 32,      # key size in words
-    "iterations": 1000,         # iteration count
+    "keySize": 256 // 32,      # 输出密钥长度（字）
+    "iterations": 1000,         # 迭代次数
     "hasher": CryptoPy.algo.SHA256,
 })
 ```
 
-> **Performance note**: The default 250000 iterations takes ~2 minutes in Python. Use a lower count for testing.
+> **性能提示**: 默认 250000 次迭代在 Python 中约需 2 分钟。测试时建议使用 `iterations=1000`。
 
-### EvpKDF (OpenSSL EVP_BytesToKey)
+### EvpKDF（OpenSSL EVP_BytesToKey）
 
 ```python
 key = CryptoPy.EvpKDF("password", "salt")
@@ -230,27 +234,27 @@ key = CryptoPy.EvpKDF("password", "salt", {
 
 ## WordArray
 
-### Create
+### 创建
 
 ```python
-# From word list
+# 从字列表创建
 wa = CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef])
 
-# With specific byte count
+# 指定有效字节数
 wa = CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef], 5)
 
-# Random bytes
+# 随机字节
 rand = CryptoPy.lib.WordArray.random(16)
 ```
 
-### Operations
+### 操作
 
 ```python
 wa.toString()                              # hex
 wa.toString(CryptoPy.enc.Base64)           # Base64
-wa.toString(CryptoPy.enc.Hex)              # explicit Hex
-wa.toString(CryptoPy.enc.Latin1)           # Latin1 string
-wa.toString(CryptoPy.enc.Utf8)             # UTF-8 string
+wa.toString(CryptoPy.enc.Hex)              # 显式 Hex
+wa.toString(CryptoPy.enc.Latin1)           # Latin1 字符串
+wa.toString(CryptoPy.enc.Utf8)             # UTF-8 字符串（需有效 UTF-8 数据）
 clone = wa.clone()
 wa.concat(other)
 wa.clamp()
@@ -258,19 +262,19 @@ wa.clamp()
 
 ---
 
-## Format & Serialization
+## 格式与序列化
 
-### OpenSSL Format (Default)
+### OpenSSL 格式（默认）
 
 ```python
 enc = CryptoPy.AES.encrypt("Message", "password")
-str(enc)  # "U2FsdGVkX1/..." (Base64 with "Salted__" prefix)
+str(enc)  # "U2FsdGVkX1/..."（Base64，含"Salted__"前缀）
 
-# Decrypt
+# 解密
 CryptoPy.AES.decrypt(enc, "password")
 ```
 
-### Custom JSON Format
+### 自定义 JSON 格式
 
 ```python
 class JsonFormatter:
@@ -304,9 +308,9 @@ print(CryptoPy.enc.Utf8.stringify(dec))  # "Message"
 
 ---
 
-## Real-World Usage
+## 实际应用场景
 
-### File Integrity Check
+### 文件完整性校验
 
 ```python
 import CryptoPy
@@ -319,7 +323,7 @@ digest = CryptoPy.SHA256(wa)
 print("SHA256:", digest)
 ```
 
-### Password Hashing
+### 密码哈希存储
 
 ```python
 import CryptoPy
@@ -332,22 +336,24 @@ key = CryptoPy.PBKDF2("user_password", salt, {
 print("Derived key:", key.toString(CryptoPy.enc.Base64))
 ```
 
-### File Encryption
+### 文件加密
 
 ```python
 import CryptoPy
 
+# 加密
 enc = CryptoPy.AES.encrypt("Sensitive data", "password")
 with open("secret.enc", "w") as f:
     f.write(str(enc))
 
+# 解密
 with open("secret.enc") as f:
     data = f.read()
 dec = CryptoPy.AES.decrypt(data, "password")
 print(CryptoPy.enc.Utf8.stringify(dec))
 ```
 
-### Streaming Hash for Large Files
+### 大文件流式哈希
 
 ```python
 import CryptoPy
@@ -360,27 +366,27 @@ with open("largefile.bin", "rb") as f:
 print("File SHA256:", sha256.finalize())
 ```
 
-### Cross-Language Interop (CryptoJS ↔ CryptoPy)
+### 跨语言互操作（CryptoJS ↔ CryptoPy）
 
 ```javascript
 // JavaScript (CryptoJS)
 var enc = CryptoJS.AES.encrypt("Hello", "password");
 console.log(enc.toString());
-// Output: U2FsdGVkX1/...
+// 输出: U2FsdGVkX1/...
 ```
 
 ```python
 # Python (CryptoPy)
 import CryptoPy
-enc = "U2FsdGVkX1/..."  # paste the output above
+enc = "U2FsdGVkX1/..."  # 粘贴上面输出的值
 dec = CryptoPy.AES.decrypt(enc, "password")
 print(CryptoPy.enc.Utf8.stringify(dec))
-# Output: Hello
+# 输出: Hello
 ```
 
 ---
 
-## CryptoJS API Mapping
+## 与 CryptoJS 对照
 
 | CryptoJS | CryptoPy |
 |----------|----------|
@@ -402,7 +408,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 | `CryptoJS.PBKDF2("pass", "salt")` | `CryptoPy.PBKDF2("pass", "salt")` |
 | `CryptoJS.lib.WordArray.random(16)` | `CryptoPy.lib.WordArray.random(16)` |
 
-## Internal API
+## 内部 API
 
 ```python
 CryptoPy.lib.Base
@@ -424,15 +430,15 @@ CryptoPy.algo.AES.createDecryptor(key, cfg)
 CryptoPy.kdf.OpenSSL.execute(password, keySize, ivSize, salt, hasher)
 ```
 
-## Development
+## 开发
 
 ```bash
-# Run tests
+# 运行测试
 PYTHONPATH=src python3 tests/test_all.py
 
-# Build
+# 打包
 python3 -m build --sdist
 
-# Publish
+# 发布
 python3 -m twine upload dist/*
 ```
