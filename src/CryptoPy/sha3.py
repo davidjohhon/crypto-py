@@ -1,5 +1,11 @@
 """
-sha3.py — SHA-3 / Keccak hash algorithm (pure Python).
+sha3.py — Keccak hash algorithm (pure Python).
+
+This implements raw Keccak[c=2d] (the algorithm used by CryptoJS),
+NOT the FIPS 202 standardized SHA-3.  The two differ in the domain
+separation byte prepended before the padding: raw Keccak uses 0x01,
+while FIPS 202 SHA-3 uses 0x06.  Standard hashlib.sha3_512() will
+produce different output from CryptoPy.SHA3() for the same input.
 """
 
 import math

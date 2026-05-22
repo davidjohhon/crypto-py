@@ -17,7 +17,6 @@ Constants h_l (left) and h_r (right) are derived from the fractional
 parts of sqrt(2), sqrt(3), sqrt(5), sqrt(7), sqrt(11).
 """
 
-import math
 from CryptoPy.core import WordArray, Hasher, _32
 
 
