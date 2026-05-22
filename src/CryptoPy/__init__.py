@@ -1,22 +1,13 @@
 """
-__init__.py — CryptoPy package initialisation.
+CryptoPy — Python port of CryptoJS.
 
-Provides the public API surface modelled after CryptoJS, with
-convenience namespaces:
-  - lib: core classes (Base, WordArray, Hasher, Cipher, etc.)
-  - algo: algorithm classes (MD5, SHA1, AES, Rabbit, etc.)
-  - enc: encoders (Hex, Latin1, Utf8, Base64, Utf16, etc.)
-  - mode: block cipher modes (CBC, CFB, CTR, ECB, OFB)
-  - pad: padding schemes (Pkcs7, AnsiX923, Iso10126, Iso97971, ZeroPadding, NoPadding)
-  - format: serialisation formats (OpenSSL, Hex)
-  - kdf: key derivation functions (OpenSSL)
-  - x64: 64-bit word types (X64Word, X64WordArray)
-
-Convenience one-shot functions are also created:
-  - MD5(), SHA1(), SHA256(), ... SHA3(), RIPEMD160()
-  - HmacMD5(), HmacSHA1(), ...
-  - AES.encrypt(), DES.encrypt(), Rabbit.encrypt(), ...
-  - PBKDF2(), EvpKDF()
+Usage:
+    import CryptoPy
+    CryptoPy.MD5("message")
+    CryptoPy.SHA256("message")
+    CryptoPy.AES.encrypt("data", "password")
+    CryptoPy.enc.Hex.parse("48656c6c6f")
+    CryptoPy.mode.CBC
 """
 
 from CryptoPy.core import Base, WordArray, BufferedBlockAlgorithm, Hasher, Hex, Latin1, Utf8, _32, urs
@@ -49,53 +40,99 @@ from CryptoPy.rabbit import Rabbit as _Rabbit
 from CryptoPy.rabbit_legacy import RabbitLegacy as _RabbitLegacy
 from CryptoPy.rc4 import RC4 as _RC4, RC4Drop as _RC4Drop
 
-lib = type('lib', (), {
-    'Base': Base, 'WordArray': WordArray,
-    'BufferedBlockAlgorithm': BufferedBlockAlgorithm,
-    'Hasher': Hasher, 'CipherParams': CipherParams,
-    'SerializableCipher': SerializableCipher,
-    'PasswordBasedCipher': PasswordBasedCipher,
-    'StreamCipher': StreamCipher,
-    'BlockCipherMode': BlockCipherMode,
-    'BlockCipher': BlockCipher, 'Cipher': Cipher,
-})()
 
-algo = type('algo', (), {
-    'MD5': _MD5, 'SHA1': _SHA1, 'SHA256': _SHA256,
-    'SHA224': _SHA224, 'SHA384': _SHA384, 'SHA512': _SHA512,
-    'SHA3': _SHA3, 'RIPEMD160': _RIPEMD160,
-    'HMAC': HMAC, 'EvpKDF': _EvpKDF, 'PBKDF2': _PBKDF2,
-    'AES': _AES, 'DES': _DES, 'TripleDES': _TripleDES,
-    'Rabbit': _Rabbit, 'RabbitLegacy': _RabbitLegacy,
-    'RC4': _RC4, 'RC4Drop': _RC4Drop,
-})()
+class _lib:
+    Base = Base
+    WordArray = WordArray
+    BufferedBlockAlgorithm = BufferedBlockAlgorithm
+    Hasher = Hasher
+    CipherParams = CipherParams
+    SerializableCipher = SerializableCipher
+    PasswordBasedCipher = PasswordBasedCipher
+    StreamCipher = StreamCipher
+    BlockCipherMode = BlockCipherMode
+    BlockCipher = BlockCipher
+    Cipher = Cipher
 
-enc = type('enc', (), {
-    'Hex': Hex, 'Latin1': Latin1, 'Utf8': Utf8,
-    'Utf16': Utf16, 'Utf16BE': Utf16BE, 'Utf16LE': Utf16LE,
-    'Base64': Base64, 'Base64url': Base64url,
-})()
+lib = _lib()
 
-mode = type('mode', (), {
-    'CBC': CBC, 'CFB': CFB, 'CTR': CTR, 'ECB': ECB, 'OFB': OFB,
-})()
 
-pad = type('pad', (), {
-    'Pkcs7': Pkcs7, 'AnsiX923': AnsiX923, 'Iso10126': Iso10126,
-    'Iso97971': Iso97971, 'ZeroPadding': ZeroPadding, 'NoPadding': NoPadding,
-})()
+class _algo:
+    MD5 = _MD5
+    SHA1 = _SHA1
+    SHA256 = _SHA256
+    SHA224 = _SHA224
+    SHA384 = _SHA384
+    SHA512 = _SHA512
+    SHA3 = _SHA3
+    RIPEMD160 = _RIPEMD160
+    HMAC = HMAC
+    EvpKDF = _EvpKDF
+    PBKDF2 = _PBKDF2
+    AES = _AES
+    DES = _DES
+    TripleDES = _TripleDES
+    Rabbit = _Rabbit
+    RabbitLegacy = _RabbitLegacy
+    RC4 = _RC4
+    RC4Drop = _RC4Drop
 
-format = type('format', (), {
-    'OpenSSL': OpenSSLFormatter, 'Hex': HexFormatter,
-})()
+algo = _algo()
 
-kdf = type('kdf', (), {
-    'OpenSSL': OpenSSLKdf,
-})()
 
-x64 = type('x64', (), {
-    'Word': X64Word, 'WordArray': X64WordArray,
-})()
+class _enc:
+    Hex = Hex
+    Latin1 = Latin1
+    Utf8 = Utf8
+    Utf16 = Utf16
+    Utf16BE = Utf16BE
+    Utf16LE = Utf16LE
+    Base64 = Base64
+    Base64url = Base64url
+
+enc = _enc()
+
+
+class _mode:
+    CBC = CBC
+    CFB = CFB
+    CTR = CTR
+    ECB = ECB
+    OFB = OFB
+
+mode = _mode()
+
+
+class _pad:
+    Pkcs7 = Pkcs7
+    AnsiX923 = AnsiX923
+    Iso10126 = Iso10126
+    Iso97971 = Iso97971
+    ZeroPadding = ZeroPadding
+    NoPadding = NoPadding
+
+pad = _pad()
+
+
+class _format:
+    OpenSSL = OpenSSLFormatter
+    Hex = HexFormatter
+
+format = _format()
+
+
+class _kdf:
+    OpenSSL = OpenSSLKdf
+
+kdf = _kdf()
+
+
+class _x64:
+    Word = X64Word
+    WordArray = X64WordArray
+
+x64 = _x64()
+
 
 MD5 = Hasher._createHelper(_MD5)
 SHA1 = Hasher._createHelper(_SHA1)

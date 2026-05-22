@@ -386,6 +386,48 @@ def test_progressive():
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
+def test_to_string():
+    print("toString encoders:")
+    ok = True
+
+    digest = CryptoPy.MD5("1")
+    ok &= assert_eq("MD5->Hex",    digest.toString(CryptoPy.enc.Hex),    str(digest))
+    ok &= assert_eq("MD5->Base64", digest.toString(CryptoPy.enc.Base64), "xMpCOKC5I4INzFCab3WEmw==")
+    ok &= assert_eq("MD5->str",    str(digest),                          "c4ca4238a0b923820dcc509a6f75849b")
+
+    for algo in ["SHA1", "SHA256", "SHA224", "SHA384", "SHA512", "RIPEMD160"]:
+        d = getattr(CryptoPy, algo)("1")
+        ok &= assert_eq(f"{algo}->Hex",    d.toString(CryptoPy.enc.Hex),    str(d))
+        ok &= assert_eq(f"{algo}->Base64", d.toString(CryptoPy.enc.Base64), d.toString(CryptoPy.enc.Base64))
+
+    for algo in ["HmacMD5", "HmacSHA1", "HmacSHA256", "HmacSHA512"]:
+        h = getattr(CryptoPy, algo)("1", "key")
+        ok &= assert_eq(f"{algo}->Hex",    h.toString(CryptoPy.enc.Hex),    str(h))
+        ok &= assert_eq(f"{algo}->Base64", h.toString(CryptoPy.enc.Base64), h.toString(CryptoPy.enc.Base64))
+
+    enc = CryptoPy.AES.encrypt("1", "pass")
+    ok &= assert_eq("CipherParams->str",     str(enc),     enc.toString())
+    ok &= assert_eq("CipherParams->Hex",     enc.toString(CryptoPy.enc.Hex),     enc.ciphertext.toString(CryptoPy.enc.Hex))
+    ok &= assert_eq("CipherParams->Base64",  enc.toString(CryptoPy.enc.Base64),  enc.ciphertext.toString(CryptoPy.enc.Base64))
+    ok &= assert_eq("CipherParams->OpenSSL", enc.toString(CryptoPy.format.OpenSSL), str(enc))
+
+    wa = CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef])
+    ok &= assert_eq("WordArray->Hex",    wa.toString(CryptoPy.enc.Hex),    "1234567890abcdef")
+    ok &= assert_eq("WordArray->Base64", wa.toString(CryptoPy.enc.Base64), "EjRWeJCrze8=")
+    ok &= assert_eq("WordArray->str",    str(wa),                          "1234567890abcdef")
+
+    wa_utf8 = CryptoPy.enc.Utf8.parse("Hello")
+    ok &= assert_eq("WordArray->Utf8",   wa_utf8.toString(CryptoPy.enc.Utf8), "Hello")
+
+    for name in ["PBKDF2", "EvpKDF"]:
+        fn = getattr(CryptoPy, name)
+        d = fn("password", "salt")
+        ok &= assert_eq(f"{name}->Hex",    d.toString(CryptoPy.enc.Hex),    str(d))
+        ok &= assert_eq(f"{name}->Base64", d.toString(CryptoPy.enc.Base64), d.toString(CryptoPy.enc.Base64))
+
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
 def test_openssl_format():
     print("OpenSSL Format:")
     ok = True
@@ -407,7 +449,7 @@ if __name__ == '__main__':
         test_rabbit, test_rabbit_legacy, test_rc4,
         test_encoders, test_pbkdf2, test_evpkdf,
         test_wordarray, test_cipher_modes, test_padding,
-        test_progressive, test_openssl_format,
+        test_progressive, test_openssl_format, test_to_string,
     ]
     passed = failed = 0
     for t in tests:
