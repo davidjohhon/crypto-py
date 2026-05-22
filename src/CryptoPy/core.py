@@ -360,7 +360,10 @@ class Utf8:
         words = wordArray.words
         for i in range(wordArray.sigBytes):
             byte_array.append((words[i >> 2] >> (24 - (i % 4) * 8)) & 0xFF)
-        return bytes(byte_array).decode('utf-8')
+        try:
+            return bytes(byte_array).decode('utf-8')
+        except UnicodeDecodeError:
+            raise ValueError('Malformed UTF-8 data')
 
     @staticmethod
     def parse(utf8Str):

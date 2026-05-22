@@ -65,10 +65,15 @@ class CipherParams(Base):
     def toString(self, formatter=None):
         if formatter is None:
             formatter = self.formatter
+        if formatter is None:
+            raise ValueError('No formatter specified and no default formatter set')
         try:
             return formatter.stringify(self)
         except (AttributeError, TypeError):
-            return formatter.stringify(self.ciphertext)
+            try:
+                return formatter.stringify(self.ciphertext)
+            except (AttributeError, TypeError):
+                raise TypeError(f'Invalid formatter/encoder: {type(formatter).__name__}')
 
     def __str__(self):
         return self.toString()

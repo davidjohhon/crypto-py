@@ -71,10 +71,12 @@ class Base64:
     @classmethod
     def parse(cls, base64Str):
         """Parse a Base64 string into a WordArray."""
+        if not isinstance(base64Str, str):
+            raise TypeError('Base64.parse requires a string')
         base64StrLength = len(base64Str)
         mapStr = cls._map
         if cls._reverseMap is None:
-            cls._reverseMap = [0] * 256
+            cls._reverseMap = [-1] * 256
             for j in range(len(mapStr)):
                 cls._reverseMap[ord(mapStr[j])] = j
         reverseMap = cls._reverseMap
@@ -83,4 +85,7 @@ class Base64:
             paddingIndex = base64Str.find(paddingChar)
             if paddingIndex != -1:
                 base64StrLength = paddingIndex
+        for ch in base64Str[:base64StrLength]:
+            if ord(ch) >= 256 or reverseMap[ord(ch)] == -1:
+                raise ValueError(f'Invalid Base64 character: {ch!r}')
         return parseLoop(base64Str, base64StrLength, reverseMap)
