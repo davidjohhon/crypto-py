@@ -4,6 +4,8 @@
 
 # CryptoPy
 
+> 🙏 Special thanks to the [CryptoJS](https://github.com/brix/crypto-js) team — this project is a Python port of their excellent JavaScript cryptography library. All algorithm designs, API patterns, and test vectors are derived from their work.
+
 Python port of [CryptoJS](https://github.com/brix/crypto-js) — standard and secure cryptographic algorithms with the same API. Zero external dependencies.
 
 ```python
@@ -348,3 +350,7 @@ python3 -m twine upload dist/*
 ## License
 
 MIT
+
+---
+
+*Found a bug? Open an issue → [github.com/davidjohhon/crypto-py/issues](https://github.com/davidjohhon/crypto-py/issues)*

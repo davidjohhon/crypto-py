@@ -440,3 +440,7 @@ python3 -m build --sdist
 # Publish
 python3 -m twine upload dist/*
 ```
+
+---
+
+*Found a bug? Open an issue → [github.com/davidjohhon/crypto-py/issues](https://github.com/davidjohhon/crypto-py/issues)*

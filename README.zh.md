@@ -4,6 +4,8 @@
 
 # CryptoPy
 
+> 🙏 感谢 [CryptoJS](https://github.com/brix/crypto-js) 团队——本项目是他们的 JavaScript 加密库的 Python 移植版。所有算法设计、API 模式及测试向量均源自他们的工作。
+
 Python 实现的加密算法库，从 [CryptoJS](https://github.com/brix/crypto-js) 移植，API 完全兼容。零外部依赖。
 
 ## 安装
@@ -257,3 +259,7 @@ python3 -m twine upload dist/*
 ## 许可证
 
 MIT
+
+---
+
+*发现 Bug？请在 GitHub 提交 Issue → [github.com/davidjohhon/crypto-py/issues](https://github.com/davidjohhon/crypto-py/issues)*

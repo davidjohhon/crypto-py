@@ -442,3 +442,7 @@ python3 -m build --sdist
 # 发布
 python3 -m twine upload dist/*
 ```
+
+---
+
+*发现 Bug？请在 GitHub 提交 Issue → [github.com/davidjohhon/crypto-py/issues](https://github.com/davidjohhon/crypto-py/issues)*
