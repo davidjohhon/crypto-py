@@ -323,8 +323,8 @@ def test_encoders():
 def test_pbkdf2():
     print("PBKDF2:")
     ok = True
-    ok &= assert_eq("default", CryptoPy.PBKDF2('password', 'salt'), '120fb6cffcf8b32c43e7225256c4f837')
-    ok &= assert_eq("keySize", CryptoPy.PBKDF2('password', 'salt', {'keySize': 8}), '120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b')
+    ok &= assert_eq("default", CryptoPy.PBKDF2('password', 'salt', {'iterations':1}), '120fb6cffcf8b32c43e7225256c4f837')
+    ok &= assert_eq("keySize", CryptoPy.PBKDF2('password', 'salt', {'keySize': 8, 'iterations': 1}), '120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b')
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
@@ -430,9 +430,9 @@ def test_to_string():
     wa_utf8 = CryptoPy.enc.Utf8.parse("Hello")
     ok &= assert_eq("WordArray->Utf8",   wa_utf8.toString(CryptoPy.enc.Utf8), "Hello")
 
-    for name in ["PBKDF2", "EvpKDF"]:
+    for name, cfg in [("PBKDF2", {"iterations": 1}), ("EvpKDF", {})]:
         fn = getattr(CryptoPy, name)
-        d = fn("password", "salt")
+        d = fn("password", "salt", cfg)
         ok &= assert_eq(f"{name}->Hex",    d.toString(CryptoPy.enc.Hex),    str(d))
         ok &= assert_eq(f"{name}->Base64", d.toString(CryptoPy.enc.Base64), d.toString(CryptoPy.enc.Base64))
 
