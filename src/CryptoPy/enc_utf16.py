@@ -24,6 +24,8 @@ class Utf16:
     @staticmethod
     def stringify(wordArray):
         """Convert a WordArray to a UTF-16 BE string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Utf16.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
         chars = []
@@ -35,6 +37,8 @@ class Utf16:
     @staticmethod
     def parse(utf16Str):
         """Encode a string as UTF-16 BE into a WordArray."""
+        if not isinstance(utf16Str, str):
+            raise TypeError(f'Utf16.parse requires a string, got {type(utf16Str).__name__}')
         words = []
         for i, char in enumerate(utf16Str):
             idx = i >> 1
@@ -55,6 +59,8 @@ class Utf16LE:
     @staticmethod
     def stringify(wordArray):
         """Convert a WordArray to a UTF-16 LE string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Utf16LE.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
         chars = []
@@ -66,6 +72,8 @@ class Utf16LE:
     @staticmethod
     def parse(utf16Str):
         """Encode a string as UTF-16 LE into a WordArray."""
+        if not isinstance(utf16Str, str):
+            raise TypeError(f'Utf16LE.parse requires a string, got {type(utf16Str).__name__}')
         words = []
         for i, char in enumerate(utf16Str):
             idx = i >> 1

@@ -299,6 +299,8 @@ class Hex:
     @staticmethod
     def stringify(wordArray):
         """Convert a WordArray to a lowercase hex string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Hex.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
         hexChars = []
@@ -314,6 +316,8 @@ class Hex:
     @staticmethod
     def parse(hexStr):
         """Parse a hex string into a WordArray."""
+        if not isinstance(hexStr, str):
+            raise TypeError(f'Hex.parse requires a string, got {type(hexStr).__name__}')
         words = []
         hexStrLength = len(hexStr)
         for i in range(0, hexStrLength, 2):
@@ -330,6 +334,8 @@ class Latin1:
     @staticmethod
     def stringify(wordArray):
         """Convert a WordArray to a Latin-1 string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Latin1.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
         latin1Chars = []
@@ -341,6 +347,8 @@ class Latin1:
     @staticmethod
     def parse(latin1Str):
         """Encode a Latin-1 string into a WordArray."""
+        if not isinstance(latin1Str, str):
+            raise TypeError(f'Latin1.parse requires a string, got {type(latin1Str).__name__}')
         words = []
         for i, char in enumerate(latin1Str):
             idx = i >> 2
@@ -356,6 +364,8 @@ class Utf8:
     @staticmethod
     def stringify(wordArray):
         """Convert a WordArray to a UTF-8 string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Utf8.stringify requires a WordArray, got {type(wordArray).__name__}')
         byte_array = []
         words = wordArray.words
         for i in range(wordArray.sigBytes):
@@ -368,6 +378,8 @@ class Utf8:
     @staticmethod
     def parse(utf8Str):
         """Encode a UTF-8 string into a WordArray."""
+        if not isinstance(utf8Str, str):
+            raise TypeError(f'Utf8.parse requires a string, got {type(utf8Str).__name__}')
         byte_array = utf8Str.encode('utf-8')
         words = []
         for i, b in enumerate(byte_array):

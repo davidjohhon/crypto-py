@@ -49,6 +49,8 @@ class Base64url:
     @classmethod
     def stringify(cls, wordArray, urlSafe=True):
         """Convert a WordArray to a Base64url-encoded string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Base64url.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
         mapStr = cls._safe_map if urlSafe else cls._map

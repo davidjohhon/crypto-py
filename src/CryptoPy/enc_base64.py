@@ -47,6 +47,8 @@ class Base64:
     @classmethod
     def stringify(cls, wordArray):
         """Convert a WordArray to a Base64-encoded string."""
+        if not hasattr(wordArray, 'words'):
+            raise TypeError(f'Base64.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
         mapStr = cls._map
