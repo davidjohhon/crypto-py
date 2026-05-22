@@ -132,8 +132,19 @@ def test_sha512():
 
 
 def test_sha3():
-    print("SHA3 (Keccak [skipped - known issue]):")
+    print("SHA3:")
     ok = True
+    ok &= assert_eq("512", CryptoPy.SHA3('', {'outputLength': 512}), '0eab42de4c3ceb9235fc91acffe746b29c29a8c366b7c60e4e67c466f36a4304c00fa9caf9d87976ba469bcbe06713b435f091ef2769fb160cdab33d3670680e')
+    ok &= assert_eq("384", CryptoPy.SHA3('', {'outputLength': 384}), '2c23146a63a29acf99e73b88f8c24eaa7dc60aa771780ccc006afbfa8fe2479b2dd2b21362337441ac12b515911957ff')
+    ok &= assert_eq("256", CryptoPy.SHA3('', {'outputLength': 256}), 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
+    ok &= assert_eq("224", CryptoPy.SHA3('', {'outputLength': 224}), 'f71837502ba8e10837bdd8d365adb85591895602fc552b48b7390abd')
+    ok &= assert_eq("default", CryptoPy.SHA3(''), '0eab42de4c3ceb9235fc91acffe746b29c29a8c366b7c60e4e67c466f36a4304c00fa9caf9d87976ba469bcbe06713b435f091ef2769fb160cdab33d3670680e')
+    ok &= assert_eq("512 msg", CryptoPy.SHA3('Message', {'outputLength': 512}), '0664441aca014fb2482fb6d412d506391c15e0a10645d1a4ec25869c234de7fb39eb056211a86037663d4440d22455e638394cb4f56a9694a7b89e7577ede2a5')
+    c = CryptoPy.algo.SHA3.create({'outputLength': 256})
+    ok &= assert_eq("clone1", c.update('a').clone().finalize(), CryptoPy.SHA3('a', {'outputLength': 256}))
+    ok &= assert_eq("clone2", c.update('b').clone().finalize(), CryptoPy.SHA3('ab', {'outputLength': 256}))
+    ok &= assert_eq("clone3", c.update('c').clone().finalize(), CryptoPy.SHA3('abc', {'outputLength': 256}))
+    ok &= assert_eq("helper", CryptoPy.algo.SHA3.create({'outputLength': 256}).finalize(''), CryptoPy.SHA3('', {'outputLength': 256}))
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
@@ -443,7 +454,7 @@ def test_openssl_format():
 if __name__ == '__main__':
     tests = [
         test_md5, test_sha1, test_sha256, test_sha224, test_sha384, test_sha512,
-        test_ripemd160,
+        test_sha3, test_ripemd160,
         test_hmac_md5, test_hmac_sha256, test_hmac_sha512,
         test_aes, test_des, test_tripledes,
         test_rabbit, test_rabbit_legacy, test_rc4,
