@@ -65,7 +65,10 @@ class CipherParams(Base):
     def toString(self, formatter=None):
         if formatter is None:
             formatter = self.formatter
-        return formatter.stringify(self)
+        try:
+            return formatter.stringify(self)
+        except (AttributeError, TypeError):
+            return formatter.stringify(self.ciphertext)
 
     def __str__(self):
         return self.toString()

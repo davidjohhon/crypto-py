@@ -5,7 +5,7 @@ Python 实现的加密算法库，从 [CryptoJS](https://github.com/brix/crypto-
 ## 安装
 
 ```bash
-pip install cryptopy
+pip install crypto4py
 ```
 
 ## 快速开始
