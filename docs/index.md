@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="index_zh.md">🇨🇳 中文</a>
+  <a href="https://github.com/davidjohhon/crypto-py/blob/main/docs/index_zh.md">🇨🇳 中文</a>
 </p>
 
 # CryptoPy API Reference

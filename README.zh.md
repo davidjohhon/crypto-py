@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="README.md">🇬🇧 English</a>
+  <a href="https://github.com/davidjohhon/crypto-py/blob/main/README.md">🇬🇧 English</a>
 </p>
 
 # CryptoPy
