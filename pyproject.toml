@@ -7,13 +7,12 @@ name = "crypto4py"
 version = "1.5.5"
 description = "Python port of CryptoJS - standard and secure cryptographic algorithms"
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT"}
 requires-python = ">=3.8"
 keywords = ["crypto", "cryptography", "hash", "aes", "md5", "sha256", "hmac"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -28,7 +27,6 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/davidjohhon/crypto-py"
 Source = "https://github.com/davidjohhon/crypto-py"
-Bug Tracker = "https://github.com/davidjohhon/crypto-py/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
