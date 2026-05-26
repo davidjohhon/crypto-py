@@ -194,10 +194,12 @@ pt = Crypto.SM2.decrypt(sk, ct)
 mpk, msk = Crypto.SM9.setup()
 usk = Crypto.SM9.generate_user_key(msk, "alice@example.com")
 sig = Crypto.SM9.sign(usk, "message")
-assert Crypto.SM9.verify(mpk, "alice@example.com", "message", sig)
+Crypto.SM9.verify(mpk, "alice@example.com", "message", sig)
 ```
 
 基于身份标识的签名系统，无需公钥证书，直接从用户标识（邮箱、手机号等）派生密钥。
+
+> **注意**：SM9 验签需要双线性配对（BN 曲线上的 Tate 配对），当前为简化实现，签名生成功能正常。
 
 ### 密钥派生
 

@@ -240,10 +240,12 @@ user_sk = Crypto.SM9.generate_user_key(master_sk, "alice@example.com")
 
 # Sign / verify
 sig = Crypto.SM9.sign(user_sk, "message")
-assert Crypto.SM9.verify(master_pk, "alice@example.com", "message", sig)
+Crypto.SM9.verify(master_pk, "alice@example.com", "message", sig)
 ```
 
 Identity-based signature system. Eliminates the need for public key certificates by deriving keys from user identity strings (email, phone, etc.).
+
+> **Note**: SM9 verification requires bilinear pairings (Tate pairing over BN curves), which is partially implemented. Signature generation works correctly.
 
 ### Key Derivation
 
