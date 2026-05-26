@@ -39,6 +39,9 @@ from Crypto.tripledes import DES as _DES, TripleDES as _TripleDES
 from Crypto.rabbit import Rabbit as _Rabbit
 from Crypto.rabbit_legacy import RabbitLegacy as _RabbitLegacy
 from Crypto.rc4 import RC4 as _RC4, RC4Drop as _RC4Drop
+from Crypto.sm3 import SM3 as _SM3
+from Crypto.sm4 import SM4 as _SM4
+from Crypto.zuc import ZUC as _ZUC
 
 
 class _lib:
@@ -76,6 +79,9 @@ class _algo:
     RabbitLegacy = _RabbitLegacy
     RC4 = _RC4
     RC4Drop = _RC4Drop
+    SM3 = _SM3
+    SM4 = _SM4
+    ZUC = _ZUC
 
 algo = _algo()
 
@@ -162,3 +168,7 @@ Rabbit = StreamCipher._createHelper(_Rabbit)
 RabbitLegacy = StreamCipher._createHelper(_RabbitLegacy)
 RC4 = StreamCipher._createHelper(_RC4)
 RC4Drop = StreamCipher._createHelper(_RC4Drop)
+
+SM3 = Hasher._createHelper(_SM3)
+SM4 = BlockCipher._createHelper(_SM4)
+ZUC = StreamCipher._createHelper(_ZUC)
