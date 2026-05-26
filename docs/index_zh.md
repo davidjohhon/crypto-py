@@ -27,6 +27,7 @@ Crypto.SHA384("Message")
 Crypto.SHA512("Message")
 Crypto.SHA3("Message", {"outputLength": 256})
 Crypto.RIPEMD160("Message")
+Crypto.SM3("Message")
 ```
 
 **输入**: `str` 或 `WordArray`。
@@ -127,6 +128,8 @@ Crypto.TripleDES.encrypt("Message", "Secret Passphrase")
 Crypto.Rabbit.encrypt("Message", "Key")
 Crypto.RC4.encrypt("Message", "Key")
 Crypto.RC4Drop.encrypt("Message", "Key", {"drop": 3072 // 4})
+Crypto.SM4.encrypt("Message", "password")
+Crypto.ZUC.encrypt("Message", "password")
 ```
 
 ### 渐进式加密
@@ -201,6 +204,47 @@ Crypto.enc.Utf16LE.parse("Hello")
 ```
 
 ---
+
+## 中国国家密码算法（商密）
+
+### SM2 — 公钥密码
+
+```python
+sk, pk = Crypto.SM2.generate_keypair()
+sig = Crypto.SM2.sign(sk, "message")
+Crypto.SM2.verify(pk, "message", sig)
+ct = Crypto.SM2.encrypt(pk, "secret")
+pt = Crypto.SM2.decrypt(sk, ct)
+```
+
+### SM3 — 哈希
+
+```python
+Crypto.SM3("message")
+```
+
+### SM4 — 分组密码
+
+```python
+Crypto.SM4.encrypt("message", "password")
+Crypto.SM4.decrypt(enc, "password")
+```
+
+### SM9 — 标识签名
+
+```python
+mpk, msk = Crypto.SM9.setup()
+usk = Crypto.SM9.generate_user_key(msk, "alice@example.com")
+sig = Crypto.SM9.sign(usk, "message")
+Crypto.SM9.verify(mpk, "alice@example.com", "message", sig)
+```
+
+### ZUC — 序列密码
+
+```python
+Crypto.ZUC.encrypt("message", "password")
+Crypto.ZUC.decrypt(enc, "password")
+```
 
 ## 密钥派生
 

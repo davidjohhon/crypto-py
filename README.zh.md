@@ -148,6 +148,57 @@ Crypto.enc.Utf16.parse("Hello")
 Crypto.enc.Utf16LE.parse("Hello")
 ```
 
+### 中国国家密码算法（商密）
+
+#### SM3 — 哈希 (GM/T 0004-2012)
+
+```python
+Crypto.SM3("message")  # 256 位哈希
+```
+
+中国国家密码标准哈希算法，安全等级等同 SHA-256。
+
+#### SM4 — 分组密码 (GM/T 0002-2012)
+
+```python
+Crypto.SM4.encrypt("message", "password")
+Crypto.SM4.decrypt(encrypted, "password")
+```
+
+128 位分组密码，32 轮迭代。在中国商用密码中替换 AES。
+
+#### ZUC — 序列密码 (GM/T 0001-2012)
+
+```python
+Crypto.ZUC.encrypt("message", "password")
+Crypto.ZUC.decrypt(encrypted, "password")
+```
+
+128 位流密码，4G/5G 移动通信标准核心算法。
+
+#### SM2 — 公钥密码 (GM/T 0003-2012)
+
+```python
+sk, pk = Crypto.SM2.generate_keypair()
+sig = Crypto.SM2.sign(sk, "message")
+assert Crypto.SM2.verify(pk, "message", sig)
+ct = Crypto.SM2.encrypt(pk, "secret")
+pt = Crypto.SM2.decrypt(sk, ct)
+```
+
+256 位椭圆曲线公钥密码，支持数字签名、密钥交换、数据加密。在中国标准中替换 RSA。
+
+#### SM9 — 标识密码 (GM/T 0044-2016)
+
+```python
+mpk, msk = Crypto.SM9.setup()
+usk = Crypto.SM9.generate_user_key(msk, "alice@example.com")
+sig = Crypto.SM9.sign(usk, "message")
+assert Crypto.SM9.verify(mpk, "alice@example.com", "message", sig)
+```
+
+基于身份标识的签名系统，无需公钥证书，直接从用户标识（邮箱、手机号等）派生密钥。
+
 ### 密钥派生
 
 ```python

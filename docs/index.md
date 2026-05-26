@@ -27,6 +27,7 @@ Crypto.SHA384("Message")
 Crypto.SHA512("Message")
 Crypto.SHA3("Message", {"outputLength": 256})
 Crypto.RIPEMD160("Message")
+Crypto.SM3("Message")
 ```
 
 **Input**: `str` or `WordArray`.
@@ -127,6 +128,8 @@ Crypto.TripleDES.encrypt("Message", "Secret Passphrase")
 Crypto.Rabbit.encrypt("Message", "Key")
 Crypto.RC4.encrypt("Message", "Key")
 Crypto.RC4Drop.encrypt("Message", "Key", {"drop": 3072 // 4})
+Crypto.SM4.encrypt("Message", "password")
+Crypto.ZUC.encrypt("Message", "password")
 ```
 
 ### Progressive Encryption

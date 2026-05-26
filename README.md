@@ -95,6 +95,7 @@ p4 = dec.finalize()
 | `Crypto.SHA512(s)` | 512 bits | `Crypto.SHA512("abc")` |
 | `Crypto.SHA3(s, cfg)` | configurable | `Crypto.SHA3("", {"outputLength":256})` |
 | `Crypto.RIPEMD160(s)` | 160 bits | `Crypto.RIPEMD160("abc")` |
+| `Crypto.SM3(s)` | 256 bits | `Crypto.SM3("abc")` |
 
 **Note**: `SHA3` implements raw Keccak[c=2d] (matching CryptoJS), not FIPS 202 SHA-3. Output differs from `hashlib.sha3_512()`.
 
@@ -122,12 +123,18 @@ Crypto.HmacRIPEMD160("message", "key")
 | `Crypto.RabbitLegacy` | Stream | 128 bits |
 | `Crypto.RC4` | Stream | 40-2048 bits |
 | `Crypto.RC4Drop` | Stream | 40-2048 bits |
+| `Crypto.SM4` | Block (SM) | 128 bits |
+| `Crypto.ZUC` | Stream (SM) | 128 bits |
 
-All ciphers share the same API:
+All symmetric ciphers share the same API:
 
 ```python
 enc = Crypto.AES.encrypt("plaintext", "password")
 dec = Crypto.AES.decrypt(enc, "password")
+
+# SM4 and ZUC support the same pattern
+enc = Crypto.SM4.encrypt("plaintext", "password")
+dec = Crypto.SM4.decrypt(enc, "password")
 ```
 
 ### Block Modes
@@ -170,7 +177,73 @@ Crypto.enc.Base64.stringify(wordArray)
 Crypto.enc.Base64url.parse("SGVsbG8", urlSafe=True)
 Crypto.enc.Utf16.parse("Hello")
 Crypto.enc.Utf16LE.parse("Hello")
+
+### Chinese National Standard (SM) Algorithms
+
+#### SM3 — Hash (GM/T 0004-2012)
+
+```python
+Crypto.SM3("message")                    # 256-bit hash
+Crypto.SM3("message") == Crypto.algo.SM3.create().finalize("message")
 ```
+
+256-bit cryptographic hash function, equivalent to SHA-256 in security level. Standardized by the Chinese Cryptographic Standards Committee.
+
+#### SM4 — Block Cipher (GM/T 0002-2012)
+
+```python
+Crypto.SM4.encrypt("message", "password")
+Crypto.SM4.decrypt(encrypted, "password")
+
+# With custom key
+key = Crypto.enc.Hex.parse("0123456789ABCDEFFEDCBA9876543210")
+cfg = {"mode": Crypto.mode.ECB, "padding": Crypto.pad.NoPadding}
+Crypto.SM4.encrypt("message", key, cfg)
+```
+
+128-bit block cipher, 128-bit key, 32 rounds. Replaces AES in Chinese commercial cryptography.
+
+#### ZUC — Stream Cipher (GM/T 0001-2012)
+
+```python
+Crypto.ZUC.encrypt("message", "password")
+Crypto.ZUC.decrypt(encrypted, "password")
+```
+
+128-bit stream cipher used as the core algorithm in 4G/5G mobile communication standards.
+
+#### SM2 — Public Key Cryptography (GM/T 0003-2012)
+
+```python
+# Generate key pair
+sk, pk = Crypto.SM2.generate_keypair()
+
+# Digital signature / verification
+signature = Crypto.SM2.sign(sk, "message")
+assert Crypto.SM2.verify(pk, "message", signature)
+
+# Encryption / decryption
+ciphertext = Crypto.SM2.encrypt(pk, "secret data")
+plaintext = Crypto.SM2.decrypt(sk, ciphertext)
+```
+
+254-bit elliptic curve public key cryptography. Supports digital signature, key exchange, and data encryption. Replaces RSA in Chinese standards.
+
+#### SM9 — Identity-Based Cryptography (GM/T 0044-2016)
+
+```python
+# Setup master key
+master_pk, master_sk = Crypto.SM9.setup()
+
+# Generate user private key from identity
+user_sk = Crypto.SM9.generate_user_key(master_sk, "alice@example.com")
+
+# Sign / verify
+sig = Crypto.SM9.sign(user_sk, "message")
+assert Crypto.SM9.verify(master_pk, "alice@example.com", "message", sig)
+```
+
+Identity-based signature system. Eliminates the need for public key certificates by deriving keys from user identity strings (email, phone, etc.).
 
 ### Key Derivation
 
