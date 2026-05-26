@@ -451,6 +451,90 @@ def test_openssl_format():
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
+def test_sm3():
+    print("SM3:")
+    ok = True
+    import subprocess
+    for msg in ['', 'abc', 'Hello SM3', 'abcd' * 100]:
+        h = Crypto.SM3(msg)
+        p = subprocess.run(['openssl', 'dgst', '-sm3'], input=msg.encode(), capture_output=True)
+        ref = p.stdout.decode().strip().split()[-1] if p.stdout else ''
+        ok &= assert_eq(f"SM3({msg[:20]})", str(h), ref)
+    # Progressive
+    h1 = Crypto.algo.SM3.create()
+    h1.update('a').update('b')
+    r1 = h1.finalize('c')
+    r2 = Crypto.SM3('abc')
+    ok &= assert_eq("progressive", str(r1), str(r2))
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
+def test_sm4():
+    print("SM4:")
+    ok = True
+    key = Crypto.enc.Hex.parse('0123456789ABCDEFFEDCBA9876543210')
+    pt  = Crypto.enc.Hex.parse('0123456789ABCDEFFEDCBA9876543210')
+    cfg = {'mode': Crypto.mode.ECB, 'padding': Crypto.pad.NoPadding}
+    enc = Crypto.SM4.encrypt(pt, key, cfg)
+    ok &= assert_eq("encrypt", enc.ciphertext, '681edf34d206965e86b3e94f536e4246')
+    dec = Crypto.SM4.decrypt(enc, key, cfg)
+    ok &= assert_eq("decrypt", str(dec), '0123456789abcdeffedcba9876543210')
+    # Roundtrip with password
+    enc2 = Crypto.SM4.encrypt('Hello SM4', 'password')
+    dec2 = Crypto.SM4.decrypt(enc2, 'password')
+    ok &= assert_eq("password roundtrip", Crypto.enc.Utf8.stringify(dec2), 'Hello SM4')
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
+def test_zuc():
+    print("ZUC:")
+    ok = True
+    zp = Crypto.enc.Hex.parse('00000000000000000000000000000000')
+    zk = Crypto.enc.Hex.parse('00000000000000000000000000000000')
+    zi = Crypto.enc.Hex.parse('00000000000000000000000000000000')
+    ze = Crypto.ZUC.encrypt(zp, zk, {'iv': zi})
+    zd = Crypto.ZUC.decrypt(ze, zk, {'iv': zi})
+    ok &= assert_eq("roundtrip", str(zd), str(zp))
+    # Password-based
+    enc2 = Crypto.ZUC.encrypt('Hello ZUC', 'password')
+    dec2 = Crypto.ZUC.decrypt(enc2, 'password')
+    ok &= assert_eq("password roundtrip", Crypto.enc.Utf8.stringify(dec2), 'Hello ZUC')
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
+def test_sm2():
+    print("SM2:")
+    ok = True
+    sk, pk = Crypto.SM2.generate_keypair()
+    # Sign/verify
+    sig = Crypto.SM2.sign(sk, "SM2 message")
+    ok &= assert_eq("sign/verify", Crypto.SM2.verify(pk, "SM2 message", sig), True)
+    ok &= assert_eq("tampered verify", Crypto.SM2.verify(pk, "wrong message", sig), False)
+    # Encrypt/decrypt
+    ct = Crypto.SM2.encrypt(pk, "SM2 secret")
+    pt = Crypto.SM2.decrypt(sk, ct)
+    ok &= assert_eq("enc/dec", pt, b"SM2 secret")
+    # Bytes message
+    sig2 = Crypto.SM2.sign(sk, b"bytes msg")
+    ok &= assert_eq("bytes sign/verify", Crypto.SM2.verify(pk, b"bytes msg", sig2), True)
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
+def test_sm9():
+    print("SM9:")
+    ok = True
+    mpk, msk = Crypto.SM9.setup()
+    usk = Crypto.SM9.generate_user_key(msk, "alice")
+    sig = Crypto.SM9.sign(usk, "SM9 message")
+    ok &= assert_eq("sign/verify", Crypto.SM9.verify(mpk, "alice", "SM9 message", sig), True)
+    ok &= assert_eq("wrong user", Crypto.SM9.verify(mpk, "bob", "SM9 message", sig), False)
+    # Bytes identity
+    usk2 = Crypto.SM9.generate_user_key(msk, b"bob")
+    sig2 = Crypto.SM9.sign(usk2, b"bytes msg")
+    ok &= assert_eq("bytes", Crypto.SM9.verify(mpk, b"bob", b"bytes msg", sig2), True)
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
 if __name__ == '__main__':
     tests = [
         test_md5, test_sha1, test_sha256, test_sha224, test_sha384, test_sha512,
@@ -461,6 +545,7 @@ if __name__ == '__main__':
         test_encoders, test_pbkdf2, test_evpkdf,
         test_wordarray, test_cipher_modes, test_padding,
         test_progressive, test_openssl_format, test_to_string,
+        test_sm3, test_sm4, test_zuc, test_sm2, test_sm9,
     ]
     passed = failed = 0
     for t in tests:

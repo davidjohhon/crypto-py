@@ -42,6 +42,12 @@ from Crypto.rc4 import RC4 as _RC4, RC4Drop as _RC4Drop
 from Crypto.sm3 import SM3 as _SM3
 from Crypto.sm4 import SM4 as _SM4
 from Crypto.zuc import ZUC as _ZUC
+from Crypto.sm2 import (generate_keypair as _sm2_genkey,
+                        sign as _sm2_sign, verify as _sm2_verify,
+                        encrypt as _sm2_encrypt, decrypt as _sm2_decrypt)
+from Crypto.sm9 import (setup as _sm9_setup,
+                        generate_user_key as _sm9_genkey,
+                        sign as _sm9_sign, verify as _sm9_verify)
 
 
 class _lib:
@@ -172,3 +178,39 @@ RC4Drop = StreamCipher._createHelper(_RC4Drop)
 SM3 = Hasher._createHelper(_SM3)
 SM4 = BlockCipher._createHelper(_SM4)
 ZUC = StreamCipher._createHelper(_ZUC)
+
+
+class SM2:
+    """SM2 public key cryptography.
+    
+    Usage:
+        sk, pk = Crypto.SM2.generate_keypair()
+        sig = Crypto.SM2.sign(sk, "message")
+        ok  = Crypto.SM2.verify(pk, "message", sig)
+        ct  = Crypto.SM2.encrypt(pk, "message")
+        pt  = Crypto.SM2.decrypt(sk, ct)
+    """
+    generate_keypair = staticmethod(_sm2_genkey)
+    sign = staticmethod(_sm2_sign)
+    verify = staticmethod(_sm2_verify)
+    encrypt = staticmethod(_sm2_encrypt)
+    decrypt = staticmethod(_sm2_decrypt)
+
+
+class SM9:
+    """SM9 identity-based cryptography.
+    
+    Usage:
+        mpk, msk = Crypto.SM9.setup()
+        usk = Crypto.SM9.generate_user_key(msk, "alice")
+        sig = Crypto.SM9.sign(usk, "message")
+        ok  = Crypto.SM9.verify(mpk, "alice", "message", sig)
+    """
+    setup = staticmethod(_sm9_setup)
+    generate_user_key = staticmethod(_sm9_genkey)
+    sign = staticmethod(_sm9_sign)
+    verify = staticmethod(_sm9_verify)
+
+
+algo.SM2 = SM2
+algo.SM9 = SM9
