@@ -1,21 +1,21 @@
 """
-CryptoPy — Python port of CryptoJS.
+Crypto — Python port of CryptoJS.
 
 Usage:
-    import CryptoPy
-    CryptoPy.MD5("message")
-    CryptoPy.SHA256("message")
-    CryptoPy.AES.encrypt("data", "password")
-    CryptoPy.enc.Hex.parse("48656c6c6f")
-    CryptoPy.mode.CBC
+    import Crypto
+    Crypto.MD5("message")
+    Crypto.SHA256("message")
+    Crypto.AES.encrypt("data", "password")
+    Crypto.enc.Hex.parse("48656c6c6f")
+    Crypto.mode.CBC
 """
 
-from CryptoPy.core import Base, WordArray, BufferedBlockAlgorithm, Hasher, Hex, Latin1, Utf8, _32, urs
-from CryptoPy.x64core import X64Word, X64WordArray
-from CryptoPy.enc_base64 import Base64
-from CryptoPy.enc_base64url import Base64url
-from CryptoPy.enc_utf16 import Utf16, Utf16BE, Utf16LE
-from CryptoPy.cipher_core import (
+from Crypto.core import Base, WordArray, BufferedBlockAlgorithm, Hasher, Hex, Latin1, Utf8, _32, urs
+from Crypto.x64core import X64Word, X64WordArray
+from Crypto.enc_base64 import Base64
+from Crypto.enc_base64url import Base64url
+from Crypto.enc_utf16 import Utf16, Utf16BE, Utf16LE
+from Crypto.cipher_core import (
     CipherParams, OpenSSLFormatter, HexFormatter,
     SerializableCipher, PasswordBasedCipher, OpenSSLKdf,
     Cipher, StreamCipher, BlockCipherMode,
@@ -23,22 +23,22 @@ from CryptoPy.cipher_core import (
     CBC, CFB, CTR, ECB, OFB,
     Pkcs7, AnsiX923, Iso10126, Iso97971, ZeroPadding, NoPadding
 )
-from CryptoPy.md5 import MD5 as _MD5
-from CryptoPy.sha1 import SHA1 as _SHA1
-from CryptoPy.sha256 import SHA256 as _SHA256
-from CryptoPy.sha224 import SHA224 as _SHA224
-from CryptoPy.sha384 import SHA384 as _SHA384
-from CryptoPy.sha512 import SHA512 as _SHA512
-from CryptoPy.sha3 import SHA3 as _SHA3
-from CryptoPy.ripemd160 import RIPEMD160 as _RIPEMD160
-from CryptoPy.hmac import HMAC
-from CryptoPy.evpkdf import EvpKDF as _EvpKDF
-from CryptoPy.pbkdf2 import PBKDF2 as _PBKDF2
-from CryptoPy.aes import AES as _AES
-from CryptoPy.tripledes import DES as _DES, TripleDES as _TripleDES
-from CryptoPy.rabbit import Rabbit as _Rabbit
-from CryptoPy.rabbit_legacy import RabbitLegacy as _RabbitLegacy
-from CryptoPy.rc4 import RC4 as _RC4, RC4Drop as _RC4Drop
+from Crypto.md5 import MD5 as _MD5
+from Crypto.sha1 import SHA1 as _SHA1
+from Crypto.sha256 import SHA256 as _SHA256
+from Crypto.sha224 import SHA224 as _SHA224
+from Crypto.sha384 import SHA384 as _SHA384
+from Crypto.sha512 import SHA512 as _SHA512
+from Crypto.sha3 import SHA3 as _SHA3
+from Crypto.ripemd160 import RIPEMD160 as _RIPEMD160
+from Crypto.hmac import HMAC
+from Crypto.evpkdf import EvpKDF as _EvpKDF
+from Crypto.pbkdf2 import PBKDF2 as _PBKDF2
+from Crypto.aes import AES as _AES
+from Crypto.tripledes import DES as _DES, TripleDES as _TripleDES
+from Crypto.rabbit import Rabbit as _Rabbit
+from Crypto.rabbit_legacy import RabbitLegacy as _RabbitLegacy
+from Crypto.rc4 import RC4 as _RC4, RC4Drop as _RC4Drop
 
 
 class _lib:

@@ -19,8 +19,8 @@ Design notes:
 """
 
 import math
-from CryptoPy.core import WordArray, BufferedBlockAlgorithm, Base, _32, urs
-from CryptoPy.enc_base64 import Base64
+from Crypto.core import WordArray, BufferedBlockAlgorithm, Base, _32, urs
+from Crypto.enc_base64 import Base64
 
 
 def _merge_cfg(base_cfg, override_cfg):
@@ -117,12 +117,12 @@ class HexFormatter:
 
     @staticmethod
     def stringify(cipherParams):
-        from CryptoPy.core import Hex
+        from Crypto.core import Hex
         return cipherParams.ciphertext.toString(Hex)
 
     @staticmethod
     def parse(inputStr):
-        from CryptoPy.core import Hex
+        from Crypto.core import Hex
         ciphertext = Hex.parse(inputStr)
         return CipherParams.create({'ciphertext': ciphertext})
 
@@ -181,7 +181,7 @@ class OpenSSLKdf:
         """
         if salt is None:
             salt = WordArray.random(64 // 8)
-        from CryptoPy.evpkdf import EvpKDF
+        from Crypto.evpkdf import EvpKDF
         if hasher is None:
             derived = EvpKDF.create({'keySize': keySize + ivSize}).compute(password, salt)
         else:

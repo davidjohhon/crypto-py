@@ -9,7 +9,7 @@ each 32-bit half.
 These types are used exclusively by SHA-512 and SHA-384.
 """
 
-from CryptoPy.core import Base
+from Crypto.core import Base
 
 
 class X64Word(Base):
@@ -56,7 +56,7 @@ class X64WordArray(Base):
         for w in self.words:
             x32Words.append(w.high)
             x32Words.append(w.low)
-        from CryptoPy.core import WordArray
+        from Crypto.core import WordArray
         return WordArray.create(x32Words, self.sigBytes)
 
     def clone(self):

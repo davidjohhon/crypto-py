@@ -15,8 +15,8 @@ The carry detection pattern:
 This emulates 64-bit addition using 32-bit arithmetic.
 """
 
-from CryptoPy.core import WordArray, Hasher, _32
-from CryptoPy.x64core import X64Word, X64WordArray
+from Crypto.core import WordArray, Hasher, _32
+from Crypto.x64core import X64Word, X64WordArray
 
 
 def _64(x):

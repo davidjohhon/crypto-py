@@ -1,61 +1,31 @@
 """
-rabbit.py — Rabbit stream cipher implementation.
+rabbit_legacy.py — RabbitLegacy stream cipher.
 
-Rabbit is a high-speed stream cipher from the eSTREAM portfolio.
-It operates on 128-bit blocks with a 128-bit key and optional 64-bit IV.
-
-The cipher has 8 internal state variables (X[0..7]) and 8 counter
-variables (C[0..7]).  Each round:
-  1. Counters are updated with carry propagation.
-  2. G-function (square + extract high/low bits) is applied to
-     X[i] + C[i] for each i, producing G[0..7].
-  3. State variables are mixed using adjacent G values.
-  4. Output (S) is extracted from the state with bit shuffling.
-
-The carry detection pattern in _nextState:
-  C[i] = C[i] + constant + (1 if C[i] < old_C[i] else 0)
-This checks for 32-bit unsigned overflow by comparing C[i] before
-and after the addition (when the new value wraps below the old value,
-a carry occurred).
+Legacy variant that does NOT endian-swap the key bytes before
+initialising the internal state.  Use Rabbit for new code.
 """
 
-from CryptoPy.cipher_core import StreamCipher, _32, urs
+from Crypto.cipher_core import StreamCipher, _32, urs
 
 
-def swapEndian(word):
-    return (
-        (((word << 8) | (word >> 24)) & 0x00FF00FF) |
-        (((word << 24) | (word >> 8)) & 0xFF00FF00)
-    )
-
-
-class Rabbit(StreamCipher):
+class RabbitLegacy(StreamCipher):
     """
-    Rabbit stream cipher.
+    Legacy Rabbit stream cipher.
+
+    Identical to Rabbit except the key bytes are NOT endian-swapped
+    before initializing the internal state.  This was an error in
+    early implementations; use Rabbit (not RabbitLegacy) for new code.
 
     Key size: 128 bits (4 words).
     IV size: 64 bits (2 words), optional.
-    Block size: 128 bits (4 words) — but operates as a stream cipher.
     """
 
     blockSize = 128 // 32
     ivSize = 64 // 32
 
     def _doReset(self):
-        """
-        Initialise the Rabbit state from the key and optional IV.
-
-        The 128-bit key is expanded into 8 state variables (X) and
-        8 counter variables (C).  The counter system is iterated
-        4 times, then the state and counters are mixed.  If an IV
-        is provided, it is XORed into the counters and the system
-        is iterated another 4 times.
-        """
         K = self._key.words[:]
         iv = getattr(self.cfg, 'iv', None)
-
-        for i in range(4):
-            K[i] = swapEndian(K[i])
 
         self._X = [
             K[0], (K[3] << 16) | urs(K[2], 16),
@@ -106,24 +76,6 @@ class Rabbit(StreamCipher):
                 self._nextState()
 
     def _nextState(self):
-        """
-        One round of Rabbit's internal state update.
-
-        Counter update with carry:
-          C[0] += 0x4D34D34D + b (carry from previous round)
-          C[i] += constant + carry_bit (1 if C[i] wrapped < C[i]_old)
-
-        G-function (squaring):
-          g = ((X[i] + C[i])^2) with high and low parts extracted
-          gh = high 32 bits of the square
-          gl = low 32 bits of the square
-          G[i] = gh ^ gl
-
-        State mixing:
-          X[0] = G[0] + rot16(G[7]) + rot16(G[6])
-          X[1] = G[1] + rot8(G[0]) + G[7]
-          ... (each X[i] uses G[i] and two adjacent G values)
-        """
         X = self._X
         C = self._C
         C_ = self._scratch_C
@@ -159,17 +111,6 @@ class Rabbit(StreamCipher):
         X[7] = _32(G[7] + ((G[6] << 8) | urs(G[6], 24)) + G[5])
 
     def _doProcessBlock(self, M, offset):
-        """
-        Generate 128 bits (4 words) of keystream and XOR into M.
-
-        S0 = X[0] ^ (X[5] >> 16) ^ (X[3] << 16)
-        S1 = X[2] ^ (X[7] >> 16) ^ (X[5] << 16)
-        S2 = X[4] ^ (X[1] >> 16) ^ (X[7] << 16)
-        S3 = X[6] ^ (X[3] >> 16) ^ (X[1] << 16)
-
-        The output words are byte-swapped before XORing with the
-        plaintext/ciphertext.
-        """
         X = self._X
         self._nextState()
 
@@ -187,3 +128,10 @@ class Rabbit(StreamCipher):
         M[offset + 1] = _32(M[offset + 1] ^ S1)
         M[offset + 2] = _32(M[offset + 2] ^ S2)
         M[offset + 3] = _32(M[offset + 3] ^ S3)
+
+
+def swapEndian(word):
+    return (
+        (((word << 8) | (word >> 24)) & 0x00FF00FF) |
+        (((word << 24) | (word >> 8)) & 0xFF00FF00)
+    )

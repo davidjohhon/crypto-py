@@ -10,12 +10,12 @@ Where:
   - opad = 0x5C5C5C... (block size bytes).
 """
 
-from CryptoPy.core import Base, Utf8
+from Crypto.core import Base, Utf8
 
 
 class HMAC(Base):
     """
-    HMAC implementation using any CryptoPy hasher.
+    HMAC implementation using any Crypto hasher.
 
     Usage:
       hmac = HMAC.create(hasher_cls, key)

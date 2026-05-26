@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crypto4py"
-version = "1.5.6"
+version = "2.0.0"
 description = "Python port of CryptoJS - standard and secure cryptographic algorithms"
 readme = "README.md"
 license = {text = "MIT"}

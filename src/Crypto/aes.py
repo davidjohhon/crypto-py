@@ -16,7 +16,7 @@ Key expansion generates keySchedule and invKeySchedule on demand.
 The inverse key schedule uses InvMixColumns transform on round keys.
 """
 
-from CryptoPy.cipher_core import BlockCipher, _32
+from Crypto.cipher_core import BlockCipher, _32
 
 
 SBOX = [0] * 256

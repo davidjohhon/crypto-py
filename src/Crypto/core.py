@@ -1,5 +1,5 @@
 """
-core.py — Foundation classes for CryptoPy (port of CryptoJS core).
+core.py — Foundation classes for Crypto (port of CryptoJS core).
 
 Provides the base class hierarchy, 32-bit integer helpers, the WordArray
 data type, progressive hashing infrastructure, and string encoders.
@@ -288,7 +288,7 @@ class Hasher(BufferedBlockAlgorithm):
     def _createHmacHelper(hasher_cls):
         """Return a convenience function: HMAC(message, key) -> WordArray."""
         def helper(message, key):
-            from CryptoPy.hmac import HMAC
+            from Crypto.hmac import HMAC
             return HMAC.create(hasher_cls, key).finalize(message)
         return helper
 

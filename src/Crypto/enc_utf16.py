@@ -10,7 +10,7 @@ byte first within each word).  When encoding UTF-16, each 16-bit code unit
 occupies the upper or lower half of a 32-bit word depending on alignment.
 """
 
-from CryptoPy.core import WordArray, _32
+from Crypto.core import WordArray, _32
 
 
 def swapEndian(word):

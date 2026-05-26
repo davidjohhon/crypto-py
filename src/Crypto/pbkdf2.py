@@ -14,9 +14,9 @@ The algorithm:
     derivedKey += block
 """
 
-from CryptoPy.core import WordArray, Base
-from CryptoPy.sha256 import SHA256
-from CryptoPy.hmac import HMAC
+from Crypto.core import WordArray, Base
+from Crypto.sha256 import SHA256
+from Crypto.hmac import HMAC
 
 
 class PBKDF2(Base):

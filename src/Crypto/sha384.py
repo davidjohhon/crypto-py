@@ -7,8 +7,8 @@ twelve 32-bit words, dropping the last two 64-bit words / four 32-bit
 words from the SHA-512 state).
 """
 
-from CryptoPy.x64core import X64Word, X64WordArray
-from CryptoPy.sha512 import SHA512
+from Crypto.x64core import X64Word, X64WordArray
+from Crypto.sha512 import SHA512
 
 
 class SHA384(SHA512):
