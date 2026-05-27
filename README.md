@@ -2,11 +2,18 @@
   <a href="https://github.com/davidjohhon/crypto-py/blob/main/README.zh.md">🇨🇳 中文</a>
 </p>
 
-# CryptoPy
+## CryptoPy
 
-> 🙏 Special thanks to the [CryptoJS](https://github.com/brix/crypto-js) team — this project is a Python port of their excellent JavaScript cryptography library. All algorithm designs, API patterns, and test vectors are derived from their work.
+> Special thanks to [CryptoJS](https://github.com/brix/crypto-js) — this project is a Python port of their JavaScript cryptography library. All algorithm designs, API patterns, and test vectors are derived from their work.
 
-Python port of [CryptoJS](https://github.com/brix/crypto-js) — standard and secure cryptographic algorithms with the same API. Zero external dependencies.
+Python cryptography library with zero external dependencies. CryptoJS-compatible API, plus Chinese national SM algorithms and RSA.
+
+| Algorithm Group | Source |
+|-----------------|--------|
+| Base library (MD5, SHA, AES, etc.) | [brix/crypto-js](https://github.com/brix/crypto-js) |
+| RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
+| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+| SM9 (R-ate pairing) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
 
 ```python
 import CryptoPy

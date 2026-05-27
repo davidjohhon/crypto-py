@@ -4,6 +4,13 @@
 
 # CryptoPy API Reference
 
+| Algorithm Group | Source |
+|-----------------|--------|
+| Base library (MD5, SHA, AES, etc.) | [brix/crypto-js](https://github.com/brix/crypto-js) |
+| RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
+| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+| SM9 (R-ate pairing) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+
 ## Import
 
 ```python

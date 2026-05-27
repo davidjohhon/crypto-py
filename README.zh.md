@@ -2,11 +2,18 @@
   <a href="https://github.com/davidjohhon/crypto-py/blob/main/README.md">🇬🇧 English</a>
 </p>
 
-# CryptoPy
+## CryptoPy
 
-> 🙏 感谢 [CryptoJS](https://github.com/brix/crypto-js) 团队——本项目是他们的 JavaScript 加密库的 Python 移植版。所有算法设计、API 模式及测试向量均源自他们的工作。
+> 感谢 [CryptoJS](https://github.com/brix/crypto-js) 团队——本项目是他们的 JavaScript 加密库的 Python 移植版。所有算法设计、API 模式及测试向量均源自他们的工作。
 
-Python 实现的加密算法库，从 [CryptoJS](https://github.com/brix/crypto-js) 移植，API 完全兼容。零外部依赖。
+Python 密码学算法库，零外部依赖。兼容 CryptoJS API，集成中国商密算法和 RSA。
+
+| 算法分类 | 来源 |
+|----------|------|
+| 基础库 (MD5, SHA, AES 等) | [brix/crypto-js](https://github.com/brix/crypto-js) |
+| RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
+| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+| SM9 (R-ate 配对) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
 
 ## 安装
 

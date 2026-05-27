@@ -4,6 +4,13 @@
 
 # CryptoPy 完整 API 文档
 
+| 算法分类 | 来源 |
+|----------|------|
+| 基础库 (MD5, SHA, AES 等) | [brix/crypto-js](https://github.com/brix/crypto-js) |
+| RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
+| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+| SM9 (R-ate 配对) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+
 ## 导入
 
 ```python
