@@ -84,6 +84,7 @@ Crypto.HmacSHA384("message", "key")
 Crypto.HmacSHA512("message", "key")
 Crypto.HmacSHA3("message", "key")
 Crypto.HmacRIPEMD160("message", "key")
+Crypto.HmacSM3("message", "key")
 ```
 
 ### 渐进式 HMAC
@@ -230,14 +231,31 @@ Crypto.SM4.encrypt("message", "password")
 Crypto.SM4.decrypt(enc, "password")
 ```
 
-### SM9 — 标识签名
+### SM9 — 标识签名 (GM/T 0044-2016)
 
 ```python
+# 生成主密钥
 mpk, msk = Crypto.SM9.setup()
-usk = Crypto.SM9.generate_user_key(msk, "alice@example.com")
-sig = Crypto.SM9.sign(usk, "message")
-Crypto.SM9.verify(mpk, "alice@example.com", "message", sig)
+
+# 从用户标识生成私钥
+user_key = Crypto.SM9.generate_user_key(msk, "alice@example.com")
+
+# 签名
+sig = Crypto.SM9.sign(user_key, "message")
+
+# 验签
+assert Crypto.SM9.verify(mpk, "alice@example.com", "message", sig)
+assert not Crypto.SM9.verify(mpk, "bob@example.com", "message", sig)
 ```
+
+基于身份标识的签名系统，基于 BN 曲线上的 R-ate 双线性配对实现。无需证书，密钥直接从用户标识（邮箱、手机号等）派生。零外部依赖。
+
+| 输出 | 长度 |
+|------|------|
+| `master_pk` | 128 字节（G₂ 仿射坐标） |
+| `master_sk` | 32 字节（标量） |
+| `user_key` | 192 字节（usk G₁ + mpk G₂） |
+| `signature` | 96 字节（h \|\| S.x \|\| S.y） |
 
 ### ZUC — 序列密码
 

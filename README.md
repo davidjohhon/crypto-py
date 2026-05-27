@@ -110,6 +110,7 @@ Crypto.HmacSHA384("message", "key")
 Crypto.HmacSHA512("message", "key")
 Crypto.HmacSHA3("message", "key")
 Crypto.HmacRIPEMD160("message", "key")
+Crypto.HmacSM3("message", "key")
 ```
 
 ### Ciphers
@@ -243,9 +244,7 @@ sig = Crypto.SM9.sign(user_sk, "message")
 Crypto.SM9.verify(master_pk, "alice@example.com", "message", sig)
 ```
 
-Identity-based signature system. Eliminates the need for public key certificates by deriving keys from user identity strings (email, phone, etc.).
-
-> **Note**: SM9 verification requires bilinear pairings (Tate pairing over BN curves), which is partially implemented. Signature generation works correctly.
+Identity-based signature system. Eliminates the need for public key certificates by deriving keys from user identity strings (email, phone, etc.). Full R-ate pairing over BN curves with zero third-party dependencies. Ported from GmSSL.
 
 ### Key Derivation
 
