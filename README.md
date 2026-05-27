@@ -2,18 +2,11 @@
   <a href="https://github.com/davidjohhon/crypto-py/blob/main/README.zh.md">🇨🇳 中文</a>
 </p>
 
-## CryptoPy
+# CryptoPy
 
 > Special thanks to [CryptoJS](https://github.com/brix/crypto-js) — this project is a Python port of their JavaScript cryptography library. All algorithm designs, API patterns, and test vectors are derived from their work.
 
-Python cryptography library with zero external dependencies. CryptoJS-compatible API, plus Chinese national SM algorithms and RSA.
-
-| Algorithm Group | Source |
-|-----------------|--------|
-| Base library (MD5, SHA, AES, etc.) | [brix/crypto-js](https://github.com/brix/crypto-js) |
-| RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
-| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
-| SM9 (R-ate pairing) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+Python cryptography library with zero external dependencies. Covers message digests (MD5, SHA-1/256/512, SM3), symmetric ciphers (AES, DES, SM4), and asymmetric cryptography (RSA, SM2, SM9). CryptoJS-compatible API.
 
 ```python
 import CryptoPy
@@ -444,6 +437,15 @@ python3 -m build --sdist
 # Publish
 python3 -m twine upload dist/*
 ```
+
+## References
+
+| Algorithm Group | Source |
+|-----------------|--------|
+| Base library (MD5, SHA, AES, etc.) | [brix/crypto-js](https://github.com/brix/crypto-js) |
+| RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
+| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+| SM9 (R-ate pairing) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
 
 ## License
 
