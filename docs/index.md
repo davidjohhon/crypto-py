@@ -279,7 +279,7 @@ ciphertext = CryptoPy.RSA.encrypt("secret data", pub)
 plaintext = CryptoPy.RSA.decrypt(ciphertext, priv)
 
 # Digital signature / verification
-signature = CryptoPy.RSA.sign("message", priv, "SHA-256")
+signature = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
 hash_name = CryptoPy.RSA.verify("message", signature, pub)  # returns "SHA-256"
 ```
 

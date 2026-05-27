@@ -205,7 +205,7 @@ CryptoPy.SM9.verify(mpk, "alice@example.com", "message", sig)
 priv, pub = CryptoPy.RSA.generate_keypair(2048)
 ct = CryptoPy.RSA.encrypt("message", pub)
 pt = CryptoPy.RSA.decrypt(ct, priv)
-sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
 ok  = CryptoPy.RSA.verify("message", sig, pub)
 ```
 

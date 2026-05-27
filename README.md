@@ -2,7 +2,7 @@
   <a href="https://github.com/davidjohhon/crypto-py/blob/main/README.zh.md">🇨🇳 中文</a>
 </p>
 
-# Crypto
+# CryptoPy
 
 > 🙏 Special thanks to the [CryptoJS](https://github.com/brix/crypto-js) team — this project is a Python port of their excellent JavaScript cryptography library. All algorithm designs, API patterns, and test vectors are derived from their work.
 
@@ -257,7 +257,7 @@ ct = CryptoPy.RSA.encrypt("message", pub)
 pt = CryptoPy.RSA.decrypt(ct, priv)
 
 # Digital signature / verification
-sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
 ok  = CryptoPy.RSA.verify("message", sig, pub)  # returns hash name
 ```
 

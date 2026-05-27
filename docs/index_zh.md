@@ -268,7 +268,7 @@ ct = CryptoPy.RSA.encrypt("secret data", pub)
 pt = CryptoPy.RSA.decrypt(ct, priv)
 
 # 数字签名 / 验签
-sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
 ok  = CryptoPy.RSA.verify("message", sig, pub)  # 返回哈希算法名
 ```
 

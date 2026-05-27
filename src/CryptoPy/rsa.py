@@ -281,7 +281,10 @@ def _compute_hash(message, method_name):
 
 
 def sign(message, private_key, hash_method="SHA-256"):
-    """RSA PKCS#1 v1.5 detached signature."""
+    """RSA PKCS#1 v1.5 detached signature.
+    
+    hash_method: CryptoPy.hash.SHA256, "SHA-256", "SHA-1", "MD5", etc.
+    """
     if isinstance(message, str):
         message = message.encode()
     n, e, d, p, q, exp1, exp2, coef = _privkey_from(private_key)

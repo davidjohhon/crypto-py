@@ -574,14 +574,14 @@ def test_rsa():
     ct = CryptoPy.RSA.encrypt("Hello RSA", pub)
     pt = CryptoPy.RSA.decrypt(ct, priv)
     ok &= assert_eq("enc/dec", pt, b"Hello RSA")
-    sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+    sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
     ok &= assert_eq("sign/verify", CryptoPy.RSA.verify("message", sig, pub), "SHA-256")
     try:
         CryptoPy.RSA.verify("wrong", sig, pub)
         ok = False
     except ValueError:
         ok &= True
-    sig2 = CryptoPy.RSA.sign(b"bytes msg", priv, "SHA-256")
+    sig2 = CryptoPy.RSA.sign(b"bytes msg", priv, CryptoPy.hash.SHA256)
     ok &= assert_eq("bytes verify", CryptoPy.RSA.verify(b"bytes msg", sig2, pub), "SHA-256")
     print(f"  {'PASS' if ok else 'FAIL'}")
 
