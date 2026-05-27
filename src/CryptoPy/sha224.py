@@ -6,8 +6,8 @@ and the output is truncated to 224 bits (7 words, dropping the
 last 32-bit word).
 """
 
-from Crypto.core import WordArray
-from Crypto.sha256 import SHA256
+from CryptoPy.core import WordArray
+from CryptoPy.sha256 import SHA256
 
 
 class SHA224(SHA256):

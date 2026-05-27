@@ -5,8 +5,8 @@ Elliptic curve over Fp (256-bit SM2 curve).
 """
 
 import os
-from Crypto.core import WordArray
-from Crypto.sm3 import SM3 as _SM3
+from CryptoPy.core import WordArray
+from CryptoPy.sm3 import SM3 as _SM3
 
 
 SM2_P = 0xFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF

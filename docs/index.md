@@ -19,15 +19,15 @@ All APIs are accessed through the `Crypto` namespace, following CryptoJS convent
 ### Basic Usage
 
 ```python
-Crypto.MD5("Message")
-Crypto.SHA1("Message")
-Crypto.SHA256("Message")
-Crypto.SHA224("Message")
-Crypto.SHA384("Message")
-Crypto.SHA512("Message")
-Crypto.SHA3("Message", {"outputLength": 256})
-Crypto.RIPEMD160("Message")
-Crypto.SM3("Message")
+CryptoPy.MD5("Message")
+CryptoPy.SHA1("Message")
+CryptoPy.SHA256("Message")
+CryptoPy.SHA224("Message")
+CryptoPy.SHA384("Message")
+CryptoPy.SHA512("Message")
+CryptoPy.SHA3("Message", {"outputLength": 256})
+CryptoPy.RIPEMD160("Message")
+CryptoPy.SM3("Message")
 ```
 
 **Input**: `str` or `WordArray`.
@@ -35,34 +35,34 @@ Crypto.SM3("Message")
 **Output**: `WordArray`. Use `str()` or `.toString()` for hex string.
 
 ```python
-h = Crypto.SHA256("Message")
+h = CryptoPy.SHA256("Message")
 print(h)                             # hex
-h.toString(Crypto.enc.Base64)      # Base64
-h.toString(Crypto.enc.Hex)         # Hex (default)
+h.toString(CryptoPy.enc.Base64)      # Base64
+h.toString(CryptoPy.enc.Hex)         # Hex (default)
 ```
 
 ### SHA3 Note
 
 > SHA3 implements raw **Keccak[c=2d]** (matching CryptoJS), **NOT** the FIPS 202 standardized SHA-3.
 > The difference is the domain separation byte: Keccak uses `0x01`, FIPS 202 SHA-3 uses `0x06`.
-> `Crypto.SHA3("")` ≠ `hashlib.sha3_512(b"")`.
+> `CryptoPy.SHA3("")` ≠ `hashlib.sha3_512(b"")`.
 
 ### Progressive Hashing
 
 ```python
-sha256 = Crypto.algo.SHA256.create()
+sha256 = CryptoPy.algo.SHA256.create()
 sha256.update("Message Part 1")
 sha256.update("Message Part 2")
 hash = sha256.finalize("Message Part 3")
 
 # Equivalent to:
-Crypto.SHA256("Message Part 1Message Part 2Message Part 3")
+CryptoPy.SHA256("Message Part 1Message Part 2Message Part 3")
 ```
 
 ### Clone Hash State
 
 ```python
-sha256 = Crypto.algo.SHA256.create()
+sha256 = CryptoPy.algo.SHA256.create()
 sha256.update("a")
 clone = sha256.clone()
 clone.finalize()                      # SHA256("a")
@@ -76,20 +76,21 @@ sha256.update("b").finalize()         # SHA256("ab")
 ### Basic Usage
 
 ```python
-Crypto.HmacMD5("message", "key")
-Crypto.HmacSHA1("message", "key")
-Crypto.HmacSHA256("message", "key")
-Crypto.HmacSHA224("message", "key")
-Crypto.HmacSHA384("message", "key")
-Crypto.HmacSHA512("message", "key")
-Crypto.HmacSHA3("message", "key")
-Crypto.HmacRIPEMD160("message", "key")
+CryptoPy.HmacMD5("message", "key")
+CryptoPy.HmacSHA1("message", "key")
+CryptoPy.HmacSHA256("message", "key")
+CryptoPy.HmacSHA224("message", "key")
+CryptoPy.HmacSHA384("message", "key")
+CryptoPy.HmacSHA512("message", "key")
+CryptoPy.HmacSHA3("message", "key")
+CryptoPy.HmacRIPEMD160("message", "key")
+CryptoPy.HmacSM3("message", "key")
 ```
 
 ### Progressive HMAC
 
 ```python
-hmac = Crypto.algo.HMAC.create(Crypto.algo.SHA256, "Secret Key")
+hmac = CryptoPy.algo.HMAC.create(CryptoPy.algo.SHA256, "Secret Key")
 hmac.update("Message Part 1")
 hmac.update("Message Part 2")
 hmac.finalize("Message Part 3")
@@ -103,54 +104,54 @@ hmac.finalize("Message Part 3")
 
 ```python
 # Password-based (auto key/IV derivation)
-enc = Crypto.AES.encrypt("Message", "Secret Passphrase")
-dec = Crypto.AES.decrypt(enc, "Secret Passphrase")
-Crypto.enc.Utf8.stringify(dec)
+enc = CryptoPy.AES.encrypt("Message", "Secret Passphrase")
+dec = CryptoPy.AES.decrypt(enc, "Secret Passphrase")
+CryptoPy.enc.Utf8.stringify(dec)
 
 # Custom Key and IV
-key = Crypto.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
-iv  = Crypto.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
-enc = Crypto.AES.encrypt("Message", key, {"iv": iv})
-dec = Crypto.AES.decrypt(enc, key, {"iv": iv})
+key = CryptoPy.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
+iv  = CryptoPy.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
+enc = CryptoPy.AES.encrypt("Message", key, {"iv": iv})
+dec = CryptoPy.AES.decrypt(enc, key, {"iv": iv})
 
 # Custom mode and padding
-Crypto.AES.encrypt("Message", "password", {
-    "mode": Crypto.mode.ECB,
-    "padding": Crypto.pad.ZeroPadding,
+CryptoPy.AES.encrypt("Message", "password", {
+    "mode": CryptoPy.mode.ECB,
+    "padding": CryptoPy.pad.ZeroPadding,
 })
 ```
 
 ### DES / TripleDES / Rabbit / RC4
 
 ```python
-Crypto.DES.encrypt("Message", "Secret Passphrase")
-Crypto.TripleDES.encrypt("Message", "Secret Passphrase")
-Crypto.Rabbit.encrypt("Message", "Key")
-Crypto.RC4.encrypt("Message", "Key")
-Crypto.RC4Drop.encrypt("Message", "Key", {"drop": 3072 // 4})
-Crypto.SM4.encrypt("Message", "password")
-Crypto.ZUC.encrypt("Message", "password")
+CryptoPy.DES.encrypt("Message", "Secret Passphrase")
+CryptoPy.TripleDES.encrypt("Message", "Secret Passphrase")
+CryptoPy.Rabbit.encrypt("Message", "Key")
+CryptoPy.RC4.encrypt("Message", "Key")
+CryptoPy.RC4Drop.encrypt("Message", "Key", {"drop": 3072 // 4})
+CryptoPy.SM4.encrypt("Message", "password")
+CryptoPy.ZUC.encrypt("Message", "password")
 ```
 
 ### Progressive Encryption
 
 ```python
-key = Crypto.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
-iv  = Crypto.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
+key = CryptoPy.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
+iv  = CryptoPy.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
 
 # Encrypt
-enc = Crypto.algo.AES.createEncryptor(key, {"iv": iv})
+enc = CryptoPy.algo.AES.createEncryptor(key, {"iv": iv})
 c1 = enc.process("Message Part 1")
 c2 = enc.process("Message Part 2")
 c3 = enc.finalize("Message Part 3")
 
 # Decrypt
-dec = Crypto.algo.AES.createDecryptor(key, {"iv": iv})
+dec = CryptoPy.algo.AES.createDecryptor(key, {"iv": iv})
 p1 = dec.process(c1)
 p2 = dec.process(c2)
 p3 = dec.process(c3)
 p4 = dec.finalize()
-Crypto.enc.Utf8.stringify(p1.clone().concat(p2).concat(p3).concat(p4))
+CryptoPy.enc.Utf8.stringify(p1.clone().concat(p2).concat(p3).concat(p4))
 ```
 
 ---
@@ -159,14 +160,14 @@ Crypto.enc.Utf8.stringify(p1.clone().concat(p2).concat(p3).concat(p4))
 
 | Mode | Description | Default |
 |------|-------------|---------|
-| `Crypto.mode.CBC` | Cipher Block Chaining | ✓ |
-| `Crypto.mode.CFB` | Cipher Feedback | |
-| `Crypto.mode.CTR` | Counter | |
-| `Crypto.mode.ECB` | Electronic Codebook | |
-| `Crypto.mode.OFB` | Output Feedback | |
+| `CryptoPy.mode.CBC` | Cipher Block Chaining | ✓ |
+| `CryptoPy.mode.CFB` | Cipher Feedback | |
+| `CryptoPy.mode.CTR` | Counter | |
+| `CryptoPy.mode.ECB` | Electronic Codebook | |
+| `CryptoPy.mode.OFB` | Output Feedback | |
 
 ```python
-Crypto.AES.encrypt("Message", "password", {"mode": Crypto.mode.CTR})
+CryptoPy.AES.encrypt("Message", "password", {"mode": CryptoPy.mode.CTR})
 ```
 
 ---
@@ -175,15 +176,15 @@ Crypto.AES.encrypt("Message", "password", {"mode": Crypto.mode.CTR})
 
 | Scheme | Description | Default |
 |--------|-------------|---------|
-| `Crypto.pad.Pkcs7` | PKCS #5/#7 | ✓ |
-| `Crypto.pad.AnsiX923` | ANSI X.923 | |
-| `Crypto.pad.Iso10126` | ISO 10126 (random) | |
-| `Crypto.pad.Iso97971` | ISO/IEC 9797-1 | |
-| `Crypto.pad.ZeroPadding` | Zero padding | |
-| `Crypto.pad.NoPadding` | No padding | |
+| `CryptoPy.pad.Pkcs7` | PKCS #5/#7 | ✓ |
+| `CryptoPy.pad.AnsiX923` | ANSI X.923 | |
+| `CryptoPy.pad.Iso10126` | ISO 10126 (random) | |
+| `CryptoPy.pad.Iso97971` | ISO/IEC 9797-1 | |
+| `CryptoPy.pad.ZeroPadding` | Zero padding | |
+| `CryptoPy.pad.NoPadding` | No padding | |
 
 ```python
-Crypto.AES.encrypt("Message", "password", {"padding": Crypto.pad.Iso97971})
+CryptoPy.AES.encrypt("Message", "password", {"padding": CryptoPy.pad.Iso97971})
 ```
 
 ---
@@ -191,17 +192,90 @@ Crypto.AES.encrypt("Message", "password", {"padding": Crypto.pad.Iso97971})
 ## Encoders
 
 ```python
-Crypto.enc.Hex.parse("48656c6c6f")
-Crypto.enc.Hex.stringify(wordArray)
-Crypto.enc.Utf8.parse("Hello, World!")
-Crypto.enc.Utf8.stringify(wordArray)
-Crypto.enc.Latin1.parse("Hello")
-Crypto.enc.Base64.parse("SGVsbG8sIFdvcmxkIQ==")
-Crypto.enc.Base64.stringify(wordArray)
-Crypto.enc.Base64url.parse("SGVsbG8sIFdvcmxkIQ==", urlSafe=True)
-Crypto.enc.Utf16.parse("Hello")
-Crypto.enc.Utf16LE.parse("Hello")
+CryptoPy.enc.Hex.parse("48656c6c6f")
+CryptoPy.enc.Hex.stringify(wordArray)
+CryptoPy.enc.Utf8.parse("Hello, World!")
+CryptoPy.enc.Utf8.stringify(wordArray)
+CryptoPy.enc.Latin1.parse("Hello")
+CryptoPy.enc.Base64.parse("SGVsbG8sIFdvcmxkIQ==")
+CryptoPy.enc.Base64.stringify(wordArray)
+CryptoPy.enc.Base64url.parse("SGVsbG8sIFdvcmxkIQ==", urlSafe=True)
+CryptoPy.enc.Utf16.parse("Hello")
+CryptoPy.enc.Utf16LE.parse("Hello")
 ```
+
+---
+
+## Chinese National Standard (SM) Algorithms
+
+### SM2 — Public Key Cryptography (GM/T 0003-2012)
+
+```python
+# Generate key pair
+sk, pk = CryptoPy.SM2.generate_keypair()
+
+# Digital signature / verification
+signature = CryptoPy.SM2.sign(sk, "message")
+assert CryptoPy.SM2.verify(pk, "message", signature)
+
+# Encryption / decryption
+ciphertext = CryptoPy.SM2.encrypt(pk, "secret data")
+plaintext = CryptoPy.SM2.decrypt(sk, ciphertext)
+```
+
+254-bit elliptic curve public key cryptography. Supports digital signature, key exchange, and data encryption.
+
+### SM3 — Hash (GM/T 0004-2012)
+
+```python
+CryptoPy.SM3("message")
+```
+
+256-bit cryptographic hash function, equivalent to SHA-256.
+
+### SM4 — Block Cipher (GM/T 0002-2012)
+
+```python
+CryptoPy.SM4.encrypt("message", "password")
+CryptoPy.SM4.decrypt(encrypted, "password")
+```
+
+128-bit block cipher, 32 rounds. National standard replacement for AES.
+
+### SM9 — Identity-Based Signature (GM/T 0044-2016)
+
+```python
+# Setup master key
+master_pk, master_sk = CryptoPy.SM9.setup()
+
+# Generate user private key from identity
+user_key = CryptoPy.SM9.generate_user_key(master_sk, "alice@example.com")
+
+# Sign
+signature = CryptoPy.SM9.sign(user_key, "message")
+
+# Verify
+assert CryptoPy.SM9.verify(master_pk, "alice@example.com", "message", signature)
+assert not CryptoPy.SM9.verify(master_pk, "bob@example.com", "message", signature)
+```
+
+Identity-based signature system using bilinear pairings (R-ate pairing over BN curves). No certificate needed — keys are derived directly from user identity strings. Zero external dependencies.
+
+| Output | Size |
+|--------|------|
+| `master_pk` | 128 bytes (G₂ affine point) |
+| `master_sk` | 32 bytes (scalar) |
+| `user_key` | 192 bytes (usk G₁ affine + mpk G₂ affine) |
+| `signature` | 96 bytes (h || S.x || S.y) |
+
+### ZUC — Stream Cipher (GM/T 0001-2012)
+
+```python
+CryptoPy.ZUC.encrypt("message", "password")
+CryptoPy.ZUC.decrypt(encrypted, "password")
+```
+
+128-bit stream cipher used in 4G/5G mobile communication standards.
 
 ---
 
@@ -211,13 +285,13 @@ Crypto.enc.Utf16LE.parse("Hello")
 
 ```python
 # Default (SHA256, 250000 iterations, 128-bit key)
-key = Crypto.PBKDF2("password", "salt")
+key = CryptoPy.PBKDF2("password", "salt")
 
 # Full parameters
-key = Crypto.PBKDF2("password", "salt", {
+key = CryptoPy.PBKDF2("password", "salt", {
     "keySize": 256 // 32,      # key size in words
     "iterations": 1000,         # iteration count
-    "hasher": Crypto.algo.SHA256,
+    "hasher": CryptoPy.algo.SHA256,
 })
 ```
 
@@ -226,10 +300,10 @@ key = Crypto.PBKDF2("password", "salt", {
 ### EvpKDF (OpenSSL EVP_BytesToKey)
 
 ```python
-key = Crypto.EvpKDF("password", "salt")
-key = Crypto.EvpKDF("password", "salt", {
+key = CryptoPy.EvpKDF("password", "salt")
+key = CryptoPy.EvpKDF("password", "salt", {
     "keySize": 256 // 32,
-    "hasher": Crypto.algo.MD5,
+    "hasher": CryptoPy.algo.MD5,
 })
 ```
 
@@ -241,23 +315,23 @@ key = Crypto.EvpKDF("password", "salt", {
 
 ```python
 # From word list
-wa = Crypto.lib.WordArray.create([0x12345678, 0x90abcdef])
+wa = CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef])
 
 # With specific byte count
-wa = Crypto.lib.WordArray.create([0x12345678, 0x90abcdef], 5)
+wa = CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef], 5)
 
 # Random bytes
-rand = Crypto.lib.WordArray.random(16)
+rand = CryptoPy.lib.WordArray.random(16)
 ```
 
 ### Operations
 
 ```python
 wa.toString()                              # hex
-wa.toString(Crypto.enc.Base64)           # Base64
-wa.toString(Crypto.enc.Hex)              # explicit Hex
-wa.toString(Crypto.enc.Latin1)           # Latin1 string
-wa.toString(Crypto.enc.Utf8)             # UTF-8 string
+wa.toString(CryptoPy.enc.Base64)           # Base64
+wa.toString(CryptoPy.enc.Hex)              # explicit Hex
+wa.toString(CryptoPy.enc.Latin1)           # Latin1 string
+wa.toString(CryptoPy.enc.Utf8)             # UTF-8 string
 clone = wa.clone()
 wa.concat(other)
 wa.clamp()
@@ -270,11 +344,11 @@ wa.clamp()
 ### OpenSSL Format (Default)
 
 ```python
-enc = Crypto.AES.encrypt("Message", "password")
+enc = CryptoPy.AES.encrypt("Message", "password")
 str(enc)  # "U2FsdGVkX1/..." (Base64 with "Salted__" prefix)
 
 # Decrypt
-Crypto.AES.decrypt(enc, "password")
+CryptoPy.AES.decrypt(enc, "password")
 ```
 
 ### Custom JSON Format
@@ -284,7 +358,7 @@ class JsonFormatter:
     @staticmethod
     def stringify(cp):
         import json
-        obj = {"ct": cp.ciphertext.toString(Crypto.enc.Base64)}
+        obj = {"ct": cp.ciphertext.toString(CryptoPy.enc.Base64)}
         if hasattr(cp, 'iv') and cp.iv:
             obj["iv"] = cp.iv.toString()
         if hasattr(cp, 'salt') and cp.salt:
@@ -295,18 +369,18 @@ class JsonFormatter:
     def parse(s):
         import json
         obj = json.loads(s)
-        cp = Crypto.lib.CipherParams.create({
-            "ciphertext": Crypto.enc.Base64.parse(obj["ct"]),
+        cp = CryptoPy.lib.CipherParams.create({
+            "ciphertext": CryptoPy.enc.Base64.parse(obj["ct"]),
         })
         if "iv" in obj:
-            cp.iv = Crypto.enc.Hex.parse(obj["iv"])
+            cp.iv = CryptoPy.enc.Hex.parse(obj["iv"])
         if "s" in obj:
-            cp.salt = Crypto.enc.Hex.parse(obj["s"])
+            cp.salt = CryptoPy.enc.Hex.parse(obj["s"])
         return cp
 
-enc = Crypto.AES.encrypt("Message", "password", {"format": JsonFormatter})
-dec = Crypto.AES.decrypt(enc, "password", {"format": JsonFormatter})
-print(Crypto.enc.Utf8.stringify(dec))  # "Message"
+enc = CryptoPy.AES.encrypt("Message", "password", {"format": JsonFormatter})
+dec = CryptoPy.AES.decrypt(enc, "password", {"format": JsonFormatter})
+print(CryptoPy.enc.Utf8.stringify(dec))  # "Message"
 ```
 
 ---
@@ -321,8 +395,8 @@ import Crypto
 with open("file.bin", "rb") as f:
     data = f.read()
 
-wa = Crypto.lib.WordArray.create(list(data), len(data))
-digest = Crypto.SHA256(wa)
+wa = CryptoPy.lib.WordArray.create(list(data), len(data))
+digest = CryptoPy.SHA256(wa)
 print("SHA256:", digest)
 ```
 
@@ -331,12 +405,12 @@ print("SHA256:", digest)
 ```python
 import Crypto
 
-salt = Crypto.lib.WordArray.random(16)
-key = Crypto.PBKDF2("user_password", salt, {
+salt = CryptoPy.lib.WordArray.random(16)
+key = CryptoPy.PBKDF2("user_password", salt, {
     "keySize": 256 // 32,
     "iterations": 10000,
 })
-print("Derived key:", key.toString(Crypto.enc.Base64))
+print("Derived key:", key.toString(CryptoPy.enc.Base64))
 ```
 
 ### File Encryption
@@ -344,14 +418,14 @@ print("Derived key:", key.toString(Crypto.enc.Base64))
 ```python
 import Crypto
 
-enc = Crypto.AES.encrypt("Sensitive data", "password")
+enc = CryptoPy.AES.encrypt("Sensitive data", "password")
 with open("secret.enc", "w") as f:
     f.write(str(enc))
 
 with open("secret.enc") as f:
     data = f.read()
-dec = Crypto.AES.decrypt(data, "password")
-print(Crypto.enc.Utf8.stringify(dec))
+dec = CryptoPy.AES.decrypt(data, "password")
+print(CryptoPy.enc.Utf8.stringify(dec))
 ```
 
 ### Streaming Hash for Large Files
@@ -359,10 +433,10 @@ print(Crypto.enc.Utf8.stringify(dec))
 ```python
 import Crypto
 
-sha256 = Crypto.algo.SHA256.create()
+sha256 = CryptoPy.algo.SHA256.create()
 with open("largefile.bin", "rb") as f:
     for chunk in iter(lambda: f.read(8192), b""):
-        wa = Crypto.lib.WordArray.create(list(chunk), len(chunk))
+        wa = CryptoPy.lib.WordArray.create(list(chunk), len(chunk))
         sha256.update(wa)
 print("File SHA256:", sha256.finalize())
 ```
@@ -380,8 +454,8 @@ console.log(enc.toString());
 # Python (Crypto)
 import Crypto
 enc = "U2FsdGVkX1/..."  # paste the output above
-dec = Crypto.AES.decrypt(enc, "password")
-print(Crypto.enc.Utf8.stringify(dec))
+dec = CryptoPy.AES.decrypt(enc, "password")
+print(CryptoPy.enc.Utf8.stringify(dec))
 # Output: Hello
 ```
 
@@ -391,44 +465,44 @@ print(Crypto.enc.Utf8.stringify(dec))
 
 | CryptoJS | Crypto |
 |----------|----------|
-| `CryptoJS.MD5("msg")` | `Crypto.MD5("msg")` |
-| `CryptoJS.SHA256("msg")` | `Crypto.SHA256("msg")` |
-| `CryptoJS.HmacSHA256("msg", "key")` | `Crypto.HmacSHA256("msg", "key")` |
-| `CryptoJS.AES.encrypt("msg", "pass")` | `Crypto.AES.encrypt("msg", "pass")` |
-| `CryptoJS.AES.decrypt(enc, "pass")` | `Crypto.AES.decrypt(enc, "pass")` |
-| `CryptoJS.enc.Utf8.parse("str")` | `Crypto.enc.Utf8.parse("str")` |
-| `CryptoJS.enc.Base64.stringify(wa)` | `Crypto.enc.Base64.stringify(wa)` |
-| `CryptoJS.enc.Hex.parse("a1b2")` | `Crypto.enc.Hex.parse("a1b2")` |
-| `CryptoJS.lib.WordArray.create([...])` | `Crypto.lib.WordArray.create([...])` |
-| `CryptoJS.algo.SHA256.create()` | `Crypto.algo.SHA256.create()` |
-| `CryptoJS.algo.HMAC.create(...)` | `Crypto.algo.HMAC.create(...)` |
-| `CryptoJS.mode.CBC` | `Crypto.mode.CBC` |
-| `CryptoJS.pad.Pkcs7` | `Crypto.pad.Pkcs7` |
-| `CryptoJS.format.OpenSSL` | `Crypto.format.OpenSSL` |
-| `CryptoJS.kdf.OpenSSL.execute(...)` | `Crypto.kdf.OpenSSL.execute(...)` |
-| `CryptoJS.PBKDF2("pass", "salt")` | `Crypto.PBKDF2("pass", "salt")` |
-| `CryptoJS.lib.WordArray.random(16)` | `Crypto.lib.WordArray.random(16)` |
+| `CryptoJS.MD5("msg")` | `CryptoPy.MD5("msg")` |
+| `CryptoJS.SHA256("msg")` | `CryptoPy.SHA256("msg")` |
+| `CryptoJS.HmacSHA256("msg", "key")` | `CryptoPy.HmacSHA256("msg", "key")` |
+| `CryptoJS.AES.encrypt("msg", "pass")` | `CryptoPy.AES.encrypt("msg", "pass")` |
+| `CryptoJS.AES.decrypt(enc, "pass")` | `CryptoPy.AES.decrypt(enc, "pass")` |
+| `CryptoJS.enc.Utf8.parse("str")` | `CryptoPy.enc.Utf8.parse("str")` |
+| `CryptoJS.enc.Base64.stringify(wa)` | `CryptoPy.enc.Base64.stringify(wa)` |
+| `CryptoJS.enc.Hex.parse("a1b2")` | `CryptoPy.enc.Hex.parse("a1b2")` |
+| `CryptoJS.lib.WordArray.create([...])` | `CryptoPy.lib.WordArray.create([...])` |
+| `CryptoJS.algo.SHA256.create()` | `CryptoPy.algo.SHA256.create()` |
+| `CryptoJS.algo.HMAC.create(...)` | `CryptoPy.algo.HMAC.create(...)` |
+| `CryptoJS.mode.CBC` | `CryptoPy.mode.CBC` |
+| `CryptoJS.pad.Pkcs7` | `CryptoPy.pad.Pkcs7` |
+| `CryptoJS.format.OpenSSL` | `CryptoPy.format.OpenSSL` |
+| `CryptoJS.kdf.OpenSSL.execute(...)` | `CryptoPy.kdf.OpenSSL.execute(...)` |
+| `CryptoJS.PBKDF2("pass", "salt")` | `CryptoPy.PBKDF2("pass", "salt")` |
+| `CryptoJS.lib.WordArray.random(16)` | `CryptoPy.lib.WordArray.random(16)` |
 
 ## Internal API
 
 ```python
-Crypto.lib.Base
-Crypto.lib.WordArray
-Crypto.lib.Hasher
-Crypto.lib.Cipher
-Crypto.lib.BlockCipher
-Crypto.lib.StreamCipher
-Crypto.lib.CipherParams
-Crypto.lib.SerializableCipher
-Crypto.lib.PasswordBasedCipher
+CryptoPy.lib.Base
+CryptoPy.lib.WordArray
+CryptoPy.lib.Hasher
+CryptoPy.lib.Cipher
+CryptoPy.lib.BlockCipher
+CryptoPy.lib.StreamCipher
+CryptoPy.lib.CipherParams
+CryptoPy.lib.SerializableCipher
+CryptoPy.lib.PasswordBasedCipher
 
-Crypto.algo.MD5.create()
-Crypto.algo.SHA256.create()
-Crypto.algo.HMAC.create(Crypto.algo.SHA256, "key")
-Crypto.algo.AES.createEncryptor(key, cfg)
-Crypto.algo.AES.createDecryptor(key, cfg)
+CryptoPy.algo.MD5.create()
+CryptoPy.algo.SHA256.create()
+CryptoPy.algo.HMAC.create(CryptoPy.algo.SHA256, "key")
+CryptoPy.algo.AES.createEncryptor(key, cfg)
+CryptoPy.algo.AES.createDecryptor(key, cfg)
 
-Crypto.kdf.OpenSSL.execute(password, keySize, ivSize, salt, hasher)
+CryptoPy.kdf.OpenSSL.execute(password, keySize, ivSize, salt, hasher)
 ```
 
 ## Development

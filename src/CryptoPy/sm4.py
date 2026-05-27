@@ -4,8 +4,8 @@ sm4.py — SM4 block cipher (GM/T 0002-2012).
 128-bit block, 128-bit key, 32 rounds.
 """
 
-from Crypto.core import WordArray, _32, urs
-from Crypto.cipher_core import BlockCipher
+from CryptoPy.core import WordArray, _32, urs
+from CryptoPy.cipher_core import BlockCipher
 
 
 SBOX = [

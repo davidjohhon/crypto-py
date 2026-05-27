@@ -1,23 +1,22 @@
 """
-enc_base64url.py — Base64url (URL-safe) encoder/decoder (RFC 4648 §5).
+enc_base64.py — Base64 encoder/decoder (RFC 4648).
 
-Same as Base64 but uses '-' and '_' instead of '+' and '/'.
-The urlSafe parameter controls which alphabet is used.
+Encodes WordArray data into Base64 strings and vice versa.
+The Base64 alphabet uses A-Z, a-z, 0-9, +, / and = for padding.
 """
 
-from Crypto.core import WordArray
+from CryptoPy.core import WordArray
 
 
 _map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
-_safe_map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
 
 
 def parseLoop(base64Str, base64StrLength, reverseMap):
     """
-    Core Base64url parsing loop.
+    Core Base64 parsing loop.
 
-    Identical logic to Base64's parseLoop; the difference is in
-    the alphabet used.
+    Processes the base64 string 4 characters at a time (3 output bytes).
+    The reverse map converts encoded characters back to their 6-bit values.
     """
     words = []
     nBytes = 0
@@ -34,26 +33,25 @@ def parseLoop(base64Str, base64StrLength, reverseMap):
     return WordArray.create(words, nBytes)
 
 
-class Base64url:
+class Base64:
     """
-    URL-safe Base64 encoder/decoder.
+    Base64 encoder/decoder.
 
-    When urlSafe=True (default), uses '-' and '_' (no padding).
-    When urlSafe=False, uses '+' and '/' (standard Base64 with '=' padding).
+    stringify(wordArray) -> Base64 string.
+    parse(base64Str) -> WordArray.
     """
 
     _map = _map
-    _safe_map = _safe_map
     _reverseMap = None
 
     @classmethod
-    def stringify(cls, wordArray, urlSafe=True):
-        """Convert a WordArray to a Base64url-encoded string."""
+    def stringify(cls, wordArray):
+        """Convert a WordArray to a Base64-encoded string."""
         if not hasattr(wordArray, 'words'):
-            raise TypeError(f'Base64url.stringify requires a WordArray, got {type(wordArray).__name__}')
+            raise TypeError(f'Base64.stringify requires a WordArray, got {type(wordArray).__name__}')
         words = wordArray.words
         sigBytes = wordArray.sigBytes
-        mapStr = cls._safe_map if urlSafe else cls._map
+        mapStr = cls._map
         wordArray.clamp()
         base64Chars = []
         i = 0
@@ -66,25 +64,30 @@ class Base64url:
                 if i + j * 0.75 < sigBytes:
                     base64Chars.append(mapStr[(triplet >> (6 * (3 - j))) & 0x3F])
             i += 3
-        paddingChar = mapStr[64] if len(mapStr) > 64 else ''
+        paddingChar = mapStr[64]
         if paddingChar:
             while len(base64Chars) % 4:
                 base64Chars.append(paddingChar)
         return ''.join(base64Chars)
 
     @classmethod
-    def parse(cls, base64Str, urlSafe=True):
-        """Parse a Base64url string into a WordArray."""
+    def parse(cls, base64Str):
+        """Parse a Base64 string into a WordArray."""
+        if not isinstance(base64Str, str):
+            raise TypeError('Base64.parse requires a string')
         base64StrLength = len(base64Str)
-        mapStr = cls._safe_map if urlSafe else cls._map
+        mapStr = cls._map
         if cls._reverseMap is None:
-            cls._reverseMap = [0] * 256
+            cls._reverseMap = [-1] * 256
             for j in range(len(mapStr)):
                 cls._reverseMap[ord(mapStr[j])] = j
         reverseMap = cls._reverseMap
-        paddingChar = mapStr[64] if len(mapStr) > 64 else ''
+        paddingChar = mapStr[64]
         if paddingChar:
             paddingIndex = base64Str.find(paddingChar)
             if paddingIndex != -1:
                 base64StrLength = paddingIndex
+        for ch in base64Str[:base64StrLength]:
+            if ord(ch) >= 256 or reverseMap[ord(ch)] == -1:
+                raise ValueError(f'Invalid Base64 character: {ch!r}')
         return parseLoop(base64Str, base64StrLength, reverseMap)

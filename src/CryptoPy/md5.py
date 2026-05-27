@@ -14,7 +14,7 @@ The four rounds (FF, GG, HH, II) use different nonlinear functions:
 """
 
 import math
-from Crypto.core import WordArray, Hasher, _32, urs
+from CryptoPy.core import WordArray, Hasher, _32, urs
 
 
 T = []

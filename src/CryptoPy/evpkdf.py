@@ -14,8 +14,8 @@ The algorithm:
     derivedKey += block
 """
 
-from Crypto.core import WordArray, Base
-from Crypto.md5 import MD5
+from CryptoPy.core import WordArray, Base
+from CryptoPy.md5 import MD5
 
 
 class EvpKDF(Base):

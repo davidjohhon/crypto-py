@@ -288,7 +288,7 @@ class Hasher(BufferedBlockAlgorithm):
     def _createHmacHelper(hasher_cls):
         """Return a convenience function: HMAC(message, key) -> WordArray."""
         def helper(message, key):
-            from Crypto.hmac import HMAC
+            from CryptoPy.hmac import HMAC
             return HMAC.create(hasher_cls, key).finalize(message)
         return helper
 

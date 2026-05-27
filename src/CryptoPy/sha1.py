@@ -11,7 +11,7 @@ SHA-1 processes 512-bit blocks and produces a 160-bit digest
 The message schedule W[0..79] expands the 16-word block to 80 words.
 """
 
-from Crypto.core import WordArray, Hasher, _32
+from CryptoPy.core import WordArray, Hasher, _32
 
 
 class SHA1(Hasher):

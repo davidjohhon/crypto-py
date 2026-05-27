@@ -4,8 +4,8 @@ zuc.py — ZUC stream cipher (GM/T 0001-2012).
 128-bit key, 128-bit IV. Generates 32-bit keystream words.
 """
 
-from Crypto.core import WordArray, _32, urs
-from Crypto.cipher_core import StreamCipher
+from CryptoPy.core import WordArray, _32, urs
+from CryptoPy.cipher_core import StreamCipher
 
 
 S0 = [

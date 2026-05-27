@@ -17,8 +17,8 @@ Tower extension:
 import os
 import struct
 
-from Crypto.core import WordArray
-from Crypto.sm3 import SM3 as _SM3
+from CryptoPy.core import WordArray
+from CryptoPy.sm3 import SM3 as _SM3
 
 
 # ─── BN curve parameters (SM9 standard curve) ───────────────
@@ -783,7 +783,7 @@ def _hard_part(f):
 # ═══════════════════════════════════════════════════════════════
 
 def _sm3_words(data):
-    """Convert bytes to Crypto.WordArray for SM3 hashing."""
+    """Convert bytes to CryptoPy.WordArray for SM3 hashing."""
     words = []
     for i in range(0, len(data), 4):
         chunk = data[i:i + 4]

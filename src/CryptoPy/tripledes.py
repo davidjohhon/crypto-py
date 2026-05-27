@@ -15,8 +15,8 @@ Key schedule notes:
     expanded right half XOR subkey.
 """
 
-from Crypto.core import WordArray
-from Crypto.cipher_core import BlockCipher, _32
+from CryptoPy.core import WordArray
+from CryptoPy.cipher_core import BlockCipher, _32
 
 
 PC1 = [

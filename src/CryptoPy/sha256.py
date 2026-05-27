@@ -11,7 +11,7 @@ fractional parts of the cube roots of the first 64 primes.
 """
 
 import math
-from Crypto.core import WordArray, Hasher, _32
+from CryptoPy.core import WordArray, Hasher, _32
 
 
 def isPrime(n):

@@ -10,7 +10,7 @@ RC4Drop is a variant that discards the first N bytes of the
 keystream to mitigate known biases in the initial output.
 """
 
-from Crypto.cipher_core import StreamCipher, _32, _merge_cfg
+from CryptoPy.cipher_core import StreamCipher, _32, _merge_cfg
 
 
 def generateKeystreamWord(self):

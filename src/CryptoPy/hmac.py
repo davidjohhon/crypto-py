@@ -10,7 +10,7 @@ Where:
   - opad = 0x5C5C5C... (block size bytes).
 """
 
-from Crypto.core import Base, Utf8
+from CryptoPy.core import Base, Utf8
 
 
 class HMAC(Base):
