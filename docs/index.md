@@ -268,6 +268,23 @@ Identity-based signature system using bilinear pairings (R-ate pairing over BN c
 | `user_key` | 192 bytes (usk G₁ affine + mpk G₂ affine) |
 | `signature` | 96 bytes (h || S.x || S.y) |
 
+### RSA — Asymmetric Encryption (PKCS#1 v1.5)
+
+```python
+# Generate key pair
+priv, pub = CryptoPy.RSA.generate_keypair(2048)
+
+# Encryption / decryption
+ciphertext = CryptoPy.RSA.encrypt("secret data", pub)
+plaintext = CryptoPy.RSA.decrypt(ciphertext, priv)
+
+# Digital signature / verification
+signature = CryptoPy.RSA.sign("message", priv, "SHA-256")
+hash_name = CryptoPy.RSA.verify("message", signature, pub)  # returns "SHA-256"
+```
+
+RSA public key cryptography with PKCS#1 v1.5 padding. Supports MD5, SHA-1, SHA-256, SHA-384, SHA-512. Uses CRT for fast decryption. Zero external dependencies.
+
 ### ZUC — Stream Cipher (GM/T 0001-2012)
 
 ```python

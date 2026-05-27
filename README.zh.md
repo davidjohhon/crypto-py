@@ -199,6 +199,18 @@ CryptoPy.SM9.verify(mpk, "alice@example.com", "message", sig)
 
 基于身份标识的签名系统，无需公钥证书，直接从用户标识（邮箱、手机号等）派生密钥。基于 BN 曲线上的 R-ate 配对实现，零外部依赖。从 GmSSL 移植。
 
+#### RSA — 非对称加密 (PKCS#1 v1.5)
+
+```python
+priv, pub = CryptoPy.RSA.generate_keypair(2048)
+ct = CryptoPy.RSA.encrypt("message", pub)
+pt = CryptoPy.RSA.decrypt(ct, priv)
+sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+ok  = CryptoPy.RSA.verify("message", sig, pub)
+```
+
+RSA 公钥密码体制，支持 PKCS#1 v1.5 填充方案。签名支持 MD5、SHA-1、SHA-256、SHA-384、SHA-512。使用中国剩余定理加速解密。零外部依赖。
+
 ### 密钥派生
 
 ```python

@@ -567,6 +567,25 @@ def test_sm9():
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
+def test_rsa():
+    print("RSA:")
+    ok = True
+    priv, pub = CryptoPy.RSA.generate_keypair(512)
+    ct = CryptoPy.RSA.encrypt("Hello RSA", pub)
+    pt = CryptoPy.RSA.decrypt(ct, priv)
+    ok &= assert_eq("enc/dec", pt, b"Hello RSA")
+    sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+    ok &= assert_eq("sign/verify", CryptoPy.RSA.verify("message", sig, pub), "SHA-256")
+    try:
+        CryptoPy.RSA.verify("wrong", sig, pub)
+        ok = False
+    except ValueError:
+        ok &= True
+    sig2 = CryptoPy.RSA.sign(b"bytes msg", priv, "SHA-256")
+    ok &= assert_eq("bytes verify", CryptoPy.RSA.verify(b"bytes msg", sig2, pub), "SHA-256")
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
 if __name__ == '__main__':
     tests = [
         test_md5, test_sha1, test_sha256, test_sha224, test_sha384, test_sha512,
@@ -578,7 +597,7 @@ if __name__ == '__main__':
         test_encoders, test_pbkdf2, test_evpkdf,
         test_wordarray, test_cipher_modes, test_padding,
         test_progressive, test_openssl_format, test_to_string,
-        test_sm3, test_sm4, test_zuc, test_sm2, test_sm9,
+        test_sm3, test_sm4, test_zuc, test_sm2, test_sm9, test_rsa,
     ]
     passed = failed = 0
     for t in tests:

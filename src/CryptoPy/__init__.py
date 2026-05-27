@@ -47,8 +47,13 @@ from CryptoPy.sm2 import (generate_keypair as _sm2_genkey,
                         encrypt as _sm2_encrypt, decrypt as _sm2_decrypt)
 from CryptoPy.sm9 import (setup as _sm9_setup,
                         generate_user_key as _sm9_genkey,
-                        sign as _sm9_sign, verify as _sm9_verify)
-
+                        sign as _sm9_sign,
+                        verify as _sm9_verify)
+from CryptoPy.rsa import (generate_keypair as _rsa_genkey,
+                          encrypt as _rsa_encrypt,
+                          decrypt as _rsa_decrypt,
+                          sign as _rsa_sign,
+                          verify as _rsa_verify)
 
 class _lib:
     Base = Base
@@ -213,5 +218,23 @@ class SM9:
     verify = staticmethod(_sm9_verify)
 
 
+class RSA:
+    """RSA public key cryptography (PKCS#1 v1.5).
+
+    Usage:
+        priv, pub = CryptoPy.RSA.generate_keypair(2048)
+        ct  = CryptoPy.RSA.encrypt("message", pub)
+        pt  = CryptoPy.RSA.decrypt(ct, priv)
+        sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+        ok  = CryptoPy.RSA.verify("message", sig, pub)
+    """
+    generate_keypair = staticmethod(_rsa_genkey)
+    encrypt = staticmethod(_rsa_encrypt)
+    decrypt = staticmethod(_rsa_decrypt)
+    sign = staticmethod(_rsa_sign)
+    verify = staticmethod(_rsa_verify)
+
+
 algo.SM2 = SM2
 algo.SM9 = SM9
+algo.RSA = RSA

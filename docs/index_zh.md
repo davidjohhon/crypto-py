@@ -257,6 +257,23 @@ assert not CryptoPy.SM9.verify(mpk, "bob@example.com", "message", sig)
 | `user_key` | 192 字节（usk G₁ + mpk G₂） |
 | `signature` | 96 字节（h \|\| S.x \|\| S.y） |
 
+### RSA — 非对称加密 (PKCS#1 v1.5)
+
+```python
+# 生成密钥对
+priv, pub = CryptoPy.RSA.generate_keypair(2048)
+
+# 加密 / 解密
+ct = CryptoPy.RSA.encrypt("secret data", pub)
+pt = CryptoPy.RSA.decrypt(ct, priv)
+
+# 数字签名 / 验签
+sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+ok  = CryptoPy.RSA.verify("message", sig, pub)  # 返回哈希算法名
+```
+
+RSA 公钥密码体制，PKCS#1 v1.5 填充方案。支持 MD5、SHA-1、SHA-256、SHA-384、SHA-512 签名。使用中国剩余定理加速解密。零外部依赖。
+
 ### ZUC — 序列密码
 
 ```python

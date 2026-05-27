@@ -246,6 +246,23 @@ CryptoPy.SM9.verify(master_pk, "alice@example.com", "message", sig)
 
 Identity-based signature system. Eliminates the need for public key certificates by deriving keys from user identity strings (email, phone, etc.). Full R-ate pairing over BN curves with zero third-party dependencies. Ported from GmSSL.
 
+#### RSA — Asymmetric Encryption (PKCS#1 v1.5)
+
+```python
+# Generate key pair
+priv, pub = CryptoPy.RSA.generate_keypair(2048)
+
+# Encryption / decryption
+ct = CryptoPy.RSA.encrypt("message", pub)
+pt = CryptoPy.RSA.decrypt(ct, priv)
+
+# Digital signature / verification
+sig = CryptoPy.RSA.sign("message", priv, "SHA-256")
+ok  = CryptoPy.RSA.verify("message", sig, pub)  # returns hash name
+```
+
+RSA public key cryptography with PKCS#1 v1.5 padding. Supports MD5, SHA-1, SHA-256, SHA-384, SHA-512 for signatures. Uses Chinese Remainder Theorem for fast decryption. Zero external dependencies.
+
 ### Key Derivation
 
 ```python
