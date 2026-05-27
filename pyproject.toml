@@ -4,16 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crypto4py"
-version = "2.0.0"
-description = "Python port of CryptoJS - standard and secure cryptographic algorithms"
+version = "2.0.1"
+description = "CryptoPy — standard and secure cryptographic algorithms, Python port of CryptoJS"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.8"
-keywords = ["crypto", "cryptography", "hash", "aes", "md5", "sha256", "hmac"]
+keywords = [
+    "crypto", "cryptography", "cryptojs", "crypto-js", "cryptopy",
+    "hash", "digest", "md5", "sha1", "sha256", "sha512", "sha3",
+    "hmac", "pbkdf2", "aes", "des", "tripledes",
+    "rsa", "pkcs1", "asymmetric", "encryption", "signature",
+    "sm2", "sm3", "sm4", "sm9", "zuc", "chinese", "gmssl",
+    "identity-based", "bilinear-pairing",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
