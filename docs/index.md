@@ -2,15 +2,15 @@
   <a href="https://github.com/davidjohhon/crypto-py/blob/main/docs/index_zh.md">🇨🇳 中文</a>
 </p>
 
-# Crypto API Reference
+# CryptoPy API Reference
 
 ## Import
 
 ```python
-import Crypto
+import CryptoPy
 ```
 
-All APIs are accessed through the `Crypto` namespace, following CryptoJS conventions.
+All APIs are accessed through the `CryptoPy` namespace, following CryptoJS conventions.
 
 ---
 
@@ -407,7 +407,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))  # "Message"
 ### File Integrity Check
 
 ```python
-import Crypto
+import CryptoPy
 
 with open("file.bin", "rb") as f:
     data = f.read()
@@ -420,7 +420,7 @@ print("SHA256:", digest)
 ### Password Hashing
 
 ```python
-import Crypto
+import CryptoPy
 
 salt = CryptoPy.lib.WordArray.random(16)
 key = CryptoPy.PBKDF2("user_password", salt, {
@@ -433,7 +433,7 @@ print("Derived key:", key.toString(CryptoPy.enc.Base64))
 ### File Encryption
 
 ```python
-import Crypto
+import CryptoPy
 
 enc = CryptoPy.AES.encrypt("Sensitive data", "password")
 with open("secret.enc", "w") as f:
@@ -448,7 +448,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 ### Streaming Hash for Large Files
 
 ```python
-import Crypto
+import CryptoPy
 
 sha256 = CryptoPy.algo.SHA256.create()
 with open("largefile.bin", "rb") as f:
@@ -458,7 +458,7 @@ with open("largefile.bin", "rb") as f:
 print("File SHA256:", sha256.finalize())
 ```
 
-### Cross-Language Interop (CryptoJS ↔ Crypto)
+### Cross-Language Interop (CryptoJS ↔ CryptoPy)
 
 ```javascript
 // JavaScript (CryptoJS)
@@ -468,8 +468,8 @@ console.log(enc.toString());
 ```
 
 ```python
-# Python (Crypto)
-import Crypto
+# Python (CryptoPy)
+import CryptoPy
 enc = "U2FsdGVkX1/..."  # paste the output above
 dec = CryptoPy.AES.decrypt(enc, "password")
 print(CryptoPy.enc.Utf8.stringify(dec))
@@ -480,7 +480,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 
 ## CryptoJS API Mapping
 
-| CryptoJS | Crypto |
+| CryptoJS | CryptoPy |
 |----------|----------|
 | `CryptoJS.MD5("msg")` | `CryptoPy.MD5("msg")` |
 | `CryptoJS.SHA256("msg")` | `CryptoPy.SHA256("msg")` |

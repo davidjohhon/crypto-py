@@ -9,7 +9,7 @@
 Python port of [CryptoJS](https://github.com/brix/crypto-js) — standard and secure cryptographic algorithms with the same API. Zero external dependencies.
 
 ```python
-import Crypto
+import CryptoPy
 
 CryptoPy.MD5("message")                          # hashing
 CryptoPy.SHA256("message")
@@ -27,7 +27,7 @@ pip install crypto4py
 ## Quick Start
 
 ```python
-import Crypto
+import CryptoPy
 
 # --- Hashing ---
 digest = CryptoPy.MD5("Message")
@@ -327,7 +327,7 @@ dec = CryptoPy.AES.decrypt(enc, "password", {"format": JsonFormatter})
 ### File Integrity Check (MD5/SHA256)
 
 ```python
-import Crypto
+import CryptoPy
 
 with open("file.bin", "rb") as f:
     data = f.read()
@@ -341,7 +341,7 @@ print("SHA256:", digest)
 ### Password Hashing (PBKDF2)
 
 ```python
-import Crypto
+import CryptoPy
 
 salt = CryptoPy.lib.WordArray.random(16)
 key = CryptoPy.PBKDF2("user_password", salt, {
@@ -355,7 +355,7 @@ print("Derived key:", key.toString(CryptoPy.enc.Base64))
 ### Encrypted File Storage
 
 ```python
-import Crypto
+import CryptoPy
 
 password = "strong-password"
 plaintext = "Sensitive data to encrypt"
@@ -376,7 +376,7 @@ print(CryptoPy.enc.Utf8.stringify(decrypted))
 ### Streaming Hash
 
 ```python
-import Crypto
+import CryptoPy
 
 sha256 = CryptoPy.algo.SHA256.create()
 with open("largefile.bin", "rb") as f:
@@ -386,7 +386,7 @@ with open("largefile.bin", "rb") as f:
 print("File SHA256:", sha256.finalize())
 ```
 
-### Cross-Language: Encrypt with CryptoJS, Decrypt with Crypto
+### Cross-Language: Encrypt with CryptoJS, Decrypt with CryptoPy
 
 ```javascript
 // JavaScript (CryptoJS)
@@ -396,8 +396,8 @@ console.log(enc.toString());
 ```
 
 ```python
-# Python (Crypto)
-import Crypto
+# Python (CryptoPy)
+import CryptoPy
 enc = "U2FsdGVkX1/..."  # paste the output above
 dec = CryptoPy.AES.decrypt(enc, "password")
 print(CryptoPy.enc.Utf8.stringify(dec))
@@ -406,7 +406,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 
 ## CryptoJS API Mapping
 
-| CryptoJS | Crypto |
+| CryptoJS | CryptoPy |
 |----------|----------|
 | `CryptoJS.MD5("msg")` | `CryptoPy.MD5("msg")` |
 | `CryptoJS.SHA256("msg")` | `CryptoPy.SHA256("msg")` |

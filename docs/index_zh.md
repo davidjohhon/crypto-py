@@ -2,15 +2,15 @@
   <a href="https://github.com/davidjohhon/crypto-py/blob/main/docs/index.md">🇬🇧 English</a>
 </p>
 
-# Crypto 完整 API 文档
+# CryptoPy 完整 API 文档
 
 ## 导入
 
 ```python
-import Crypto
+import CryptoPy
 ```
 
-所有 API 通过 `Crypto` 命名空间直接访问，风格与 CryptoJS 完全一致。
+所有 API 通过 `CryptoPy` 命名空间直接访问，风格与 CryptoJS 完全一致。
 
 ---
 
@@ -392,7 +392,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))  # "Message"
 ### 文件完整性校验
 
 ```python
-import Crypto
+import CryptoPy
 
 with open("file.bin", "rb") as f:
     data = f.read()
@@ -405,7 +405,7 @@ print("SHA256:", digest)
 ### 密码哈希存储
 
 ```python
-import Crypto
+import CryptoPy
 
 salt = CryptoPy.lib.WordArray.random(16)
 key = CryptoPy.PBKDF2("user_password", salt, {
@@ -418,7 +418,7 @@ print("Derived key:", key.toString(CryptoPy.enc.Base64))
 ### 文件加密
 
 ```python
-import Crypto
+import CryptoPy
 
 # 加密
 enc = CryptoPy.AES.encrypt("Sensitive data", "password")
@@ -435,7 +435,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 ### 大文件流式哈希
 
 ```python
-import Crypto
+import CryptoPy
 
 sha256 = CryptoPy.algo.SHA256.create()
 with open("largefile.bin", "rb") as f:
@@ -445,7 +445,7 @@ with open("largefile.bin", "rb") as f:
 print("File SHA256:", sha256.finalize())
 ```
 
-### 跨语言互操作（CryptoJS ↔ Crypto）
+### 跨语言互操作（CryptoJS ↔ CryptoPy）
 
 ```javascript
 // JavaScript (CryptoJS)
@@ -455,8 +455,8 @@ console.log(enc.toString());
 ```
 
 ```python
-# Python (Crypto)
-import Crypto
+# Python (CryptoPy)
+import CryptoPy
 enc = "U2FsdGVkX1/..."  # 粘贴上面输出的值
 dec = CryptoPy.AES.decrypt(enc, "password")
 print(CryptoPy.enc.Utf8.stringify(dec))
@@ -467,7 +467,7 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 
 ## 与 CryptoJS 对照
 
-| CryptoJS | Crypto |
+| CryptoJS | CryptoPy |
 |----------|----------|
 | `CryptoJS.MD5("msg")` | `CryptoPy.MD5("msg")` |
 | `CryptoJS.SHA256("msg")` | `CryptoPy.SHA256("msg")` |
