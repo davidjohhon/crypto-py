@@ -201,6 +201,22 @@ def test_hmac_sha512():
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
+def test_sm3_hmac():
+    print("SM3-HMAC:")
+    ok = True
+    ok &= len(str(Crypto.HmacSM3('', ''))) == 64
+    ok &= assert_eq("basic", Crypto.HmacSM3('message', 'key'), '34c90b291a80b7fd7f2be43d683935bab9d149164666c4ef8857c815cf2ef832')
+    # Progressive vs one-shot
+    hmac = Crypto.algo.HMAC.create(Crypto.algo.SM3, 'key')
+    ok &= assert_eq("progressive", hmac.update('message').finalize(), Crypto.HmacSM3('message', 'key'))
+    # With raw bytes key
+    import hashlib
+    key = Crypto.enc.Hex.parse('0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b')
+    result = Crypto.HmacSM3('Hi There', key)
+    ok &= len(str(result)) == 64
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
 def test_aes():
     print("AES:")
     ok = True
@@ -534,19 +550,20 @@ def test_sm2():
 
 
 def test_sm9():
-    print("SM9 (sign only - verify needs pairing):")
+    print("SM9:")
     ok = True
     mpk, msk = Crypto.SM9.setup()
     usk = Crypto.SM9.generate_user_key(msk, "alice")
-    # Sign should succeed
     sig = Crypto.SM9.sign(usk, "SM9 message")
-    ok &= assert_eq("sign", len(sig), 96)
+    ok &= assert_eq("sign length", len(sig), 96)
     ok &= sig != b'\x00' * 96
-    # Verify note: requires bilinear pairing (partial implementation)
-    # Generation and signing work correctly
+    ok &= assert_eq("verify", Crypto.SM9.verify(mpk, "alice", "SM9 message", sig), True)
+    ok &= assert_eq("verify wrong msg", Crypto.SM9.verify(mpk, "alice", "wrong msg", sig), False)
+    ok &= assert_eq("verify wrong id", Crypto.SM9.verify(mpk, "bob", "SM9 message", sig), False)
     usk2 = Crypto.SM9.generate_user_key(msk, b"bob")
     sig2 = Crypto.SM9.sign(usk2, b"bytes msg")
     ok &= assert_eq("bytes sign", len(sig2), 96)
+    ok &= assert_eq("bytes verify", Crypto.SM9.verify(mpk, b"bob", b"bytes msg", sig2), True)
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
@@ -555,6 +572,7 @@ if __name__ == '__main__':
         test_md5, test_sha1, test_sha256, test_sha224, test_sha384, test_sha512,
         test_sha3, test_ripemd160,
         test_hmac_md5, test_hmac_sha256, test_hmac_sha512,
+        test_sm3_hmac,
         test_aes, test_des, test_tripledes,
         test_rabbit, test_rabbit_legacy, test_rc4,
         test_encoders, test_pbkdf2, test_evpkdf,
