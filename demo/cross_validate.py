@@ -731,13 +731,50 @@ def test_asymmetric():
         cfail(label, b"SM2 secret", pt)
     print(f"  {'✓' if ok else '✗'} {label}: {pt}")
 
-    # SM2 vs gmssl (basic sign/verify cross check)
+    # SM2 vs gmssl-python cross-validation
     if GMSSL_AVAILABLE:
         print("\n--- SM2 vs gmssl-python ---")
-        # gmssl-python uses CryptSM2 differently, comparing directly is complex
-        # Focus on CryptoPy's self-consistency
-        cpass("SM2 (gmssl interop)", "N/A", "N/A",
-              detail="gmssl-python SM2 API 差异较大（基于 CryptSM2 类），跨库比对需要密钥格式转换，留待后续")
+        try:
+            from gmssl.sm2 import CryptSM2
+            sk_hex = sk.hex()
+            pk_hex = pk.hex()
+            gm = CryptSM2(private_key=sk_hex, public_key=pk_hex, mode=0, asn1=False)
+            import random as _random
+
+            # 1. CryptoPy sign -> gmssl verify (ZA-based, use sign_with_sm3 / verify_with_sm3)
+            msg = b"SM2 cross interop msg"
+            cp_sig = CryptoPy.SM2.sign(sk, msg)
+            ok = gm.verify_with_sm3(cp_sig.hex(), msg)
+            label = "SM2 sign/verify (CryptoPy sign -> gmssl verify)"
+            if ok: cpass(label, True, ok, detail="跨库签名验签一致 (ZA-SM3)")
+            else: cfail(label, True, ok)
+            print(f"  {'✓' if ok else '✗'} {label}")
+
+            # 2. gmssl sign -> CryptoPy verify
+            rnd = ''.join([_random.choice('0123456789abcdef') for _ in range(64)])
+            gm_sig = gm.sign_with_sm3(msg, rnd)
+            ok = CryptoPy.SM2.verify(pk, msg, bytes.fromhex(gm_sig)) == True
+            label = "SM2 sign/verify (gmssl sign -> CryptoPy verify)"
+            if ok: cpass(label, True, ok, detail="跨库签名验签一致 (反向)")
+            else: cfail(label, True, ok)
+            print(f"  {'✓' if ok else '✗'} {label}")
+
+            # 3. Encrypt/decrypt interop (known KDF difference, noted)
+            cp_ct = CryptoPy.SM2.encrypt(pk, b"SM2 enc interop")
+            try:
+                gm_pt = gm.decrypt(cp_ct)
+                ok = gm_pt == b"SM2 enc interop"
+            except Exception:
+                ok = False; gm_pt = None
+            label = "SM2 enc/dec (CryptoPy encrypt -> gmssl decrypt)"
+            if ok: cpass(label, b"SM2 enc interop", gm_pt, detail="跨库加解密一致")
+            else: cfail(label, b"SM2 enc interop", str(gm_pt)[:30] if gm_pt else "N/A", detail="KDF 实现差异导致解密失败")
+            print(f"  {'✓' if ok else '⚠'} {label} (KDF diff)")
+
+        except Exception as ex:
+            import traceback
+            traceback.print_exc()
+            cfail("SM2 gmssl interop", "N/A", str(ex)[:40], detail=f"互操作异常: {ex}")
 
     # SM9
     print("\n--- SM9 ---")

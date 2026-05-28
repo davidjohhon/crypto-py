@@ -15,6 +15,7 @@ SM2_B = 0x28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93
 SM2_N = 0xFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123
 SM2_GX = 0x32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7
 SM2_GY = 0xBC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0
+_DEFAULT_ID = b"1234567812345678"
 
 
 class _Point:
@@ -75,17 +76,54 @@ def _mul(k, p):
     return r
 
 
-def _sha256(data):
+def _to_wa(data):
+    """Convert bytes to WordArray (4 bytes per 32-bit word)."""
+    words = []
+    for i in range(0, len(data), 4):
+        chunk = data[i:i + 4]
+        if len(chunk) < 4:
+            chunk += b'\x00' * (4 - len(chunk))
+        words.append(int.from_bytes(chunk, 'big'))
+    return WordArray.create(words, len(data))
+
+
+def _hash(data):
+    """SM3 hash of bytes -> int."""
     h = _SM3.create()
-    wa = WordArray.create(list(data), len(data))
-    h.update(wa)
+    h.update(_to_wa(data))
     return int(h.finalize().toString(), 16)
+
+
+def _za(ida, pub_x, pub_y):
+    """Compute ZA per GM/T 0003-2012 §5.3.
+    ZA = SM3(ENTLA || IDA || a || b || xG || yG || xA || yA)
+    """
+    entla = len(ida) * 8
+    return _hash(
+        entla.to_bytes(2, 'big') +
+        ida +
+        _int_to(SM2_A) +
+        _int_to(SM2_B) +
+        _int_to(SM2_GX) +
+        _int_to(SM2_GY) +
+        _int_to(pub_x) +
+        _int_to(pub_y)
+    )
+
+
+def _hash_msg(msg, xa=None, ya=None, ida=None):
+    """SM3(ZA || M) for SM2 sign/verify, SM3(M) otherwise."""
+    if xa is not None and ya is not None:
+        if ida is None:
+            ida = _DEFAULT_ID
+        return _hash(_int_to(_za(ida, xa, ya)) + msg)
+    return _hash(msg)
 
 
 def _kdf(z, klen):
     d, ct = bytearray(), 1
     while len(d) * 8 < klen:
-        h = _sha256(z + ct.to_bytes(4, 'big'))
+        h = _hash(z + ct.to_bytes(4, 'big'))
         d.extend(h.to_bytes(32, 'big'))
         ct += 1
     return bytes(d)[:klen // 8]
@@ -98,12 +136,16 @@ def generate_keypair():
     return _int_to(d), _int_to(Q.x) + _int_to(Q.y)
 
 
-def sign(private_key, message):
-    """Sign a message with SM2 private key. Returns 64-byte signature."""
+def sign(private_key, message, ida=None):
+    """Sign a message with SM2 private key. Returns 64-byte signature.
+    
+    ida: optional user identity bytes (default: b'1234567812345678').
+    """
     if isinstance(message, str):
         message = message.encode()
     d = _int_from(private_key)
-    e = _sha256(message)
+    Q = _mul(d, _G)
+    e = _hash_msg(message, Q.x, Q.y, ida)
     while True:
         k = _int_from(os.urandom(32)) % (SM2_N - 1) + 1
         p = _mul(k, _G)
@@ -116,8 +158,11 @@ def sign(private_key, message):
         return _int_to(r) + _int_to(s)
 
 
-def verify(public_key, message, signature):
-    """Verify an SM2 signature. Returns True/False."""
+def verify(public_key, message, signature, ida=None):
+    """Verify an SM2 signature. Returns True/False.
+    
+    ida: optional user identity bytes (default: b'1234567812345678').
+    """
     if isinstance(message, str):
         message = message.encode()
     r, s = _int_from(signature[:32]), _int_from(signature[32:])
@@ -127,7 +172,7 @@ def verify(public_key, message, signature):
     if t == 0:
         return False
     P = _Point(_int_from(public_key[:32]), _int_from(public_key[32:]))
-    e = _sha256(message)
+    e = _hash_msg(message, P.x, P.y, ida)
     gs = _mul(s, _G)
     tp = _mul(t, P)
     p = _add(gs, tp)
@@ -148,7 +193,7 @@ def encrypt(public_key, message):
         if any(t):
             break
     c2 = bytes(a ^ b for a, b in zip(message, t))
-    c3 = _int_to(_sha256(x2 + message + y2), 32)
+    c3 = _int_to(_hash(x2 + message + y2), 32)
     return _int_to(c1.x) + _int_to(c1.y) + c3 + c2
 
 
@@ -163,7 +208,7 @@ def decrypt(private_key, ciphertext):
     x2, y2 = _int_to(p.x), _int_to(p.y)
     t = _kdf(x2 + y2, len(c2) * 8)
     m = bytes(a ^ b for a, b in zip(c2, t))
-    u = _int_to(_sha256(x2 + m + y2), 32)
+    u = _int_to(_hash(x2 + m + y2), 32)
     if u != c3:
         raise ValueError("SM2 decrypt: invalid ciphertext")
     return m
