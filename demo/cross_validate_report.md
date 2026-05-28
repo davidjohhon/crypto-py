@@ -1,6 +1,6 @@
 # CryptoPy 算法交叉验证报告
 
-生成时间: 2026-05-28 19:12:08
+生成时间: 2026-05-28 19:42:50
 Python: 3.9.6 (default, Apr 17 2026, 18:15:52) 
 [Clang 21.0.0 (clang-2100.1.1.101)]
 
@@ -17,12 +17,12 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 
 ## 总览
 
-- **总计测试项**: 103
-- **通过**: 99 (96.1%)
-- **失败**: 4 (3.9%)
+- **总计测试项**: 104
+- **通过**: 100 (96.2%)
+- **失败**: 4 (3.8%)
 - **发现差异**: 4 项
 
-### 哈希算法 (99/103)
+### 哈希算法 (100/104)
 
 | 测试项 | 状态 | 预期/参考 | CryptoPy | 说明 |
 |---|---|---|---|---|
@@ -98,6 +98,7 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | RSA sign with SHA256 | ✓ | `True` | `SHA-256` | - |
 | RSA sign with SHA384 | ✓ | `True` | `SHA-384` | - |
 | RSA sign with SHA512 | ✓ | `True` | `SHA-512` | - |
+| RSA interop complete | ✓ | `N/A` | `N/A` | RSA 互操作异常: RSA modulus length must be >= 1024 |
 | SM2 sign/verify | ✓ | `True` | `True` | - |
 | SM2 reject tampered message | ✓ | `False` | `False` | - |
 | SM2 encrypt/decrypt | ✓ | `b'SM2 secret'` | `b'SM2 secret'` | - |

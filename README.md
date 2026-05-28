@@ -95,7 +95,11 @@ p4 = dec.finalize()
 | `CryptoPy.SHA512(s)` | 512 bits | `CryptoPy.SHA512("abc")` |
 | `CryptoPy.SHA3(s, cfg)` | configurable | `CryptoPy.SHA3("", {"outputLength":256})` |
 
-> **SHA3**: Default uses Keccak[c=2d] (CryptoJS compatible). For hashlib-compatible FIPS 202 SHA-3 output, use `{'variant': 'sha3'}`. With `variant: sha3`, full cross-validated against `hashlib.sha3_*()` — 103/103 tests pass.
+> **SHA3**: Two variants available — default `'keccak'` (CryptoJS compatible) and `'sha3'` (FIPS 202, hashlib compatible). Only the domain separation byte differs (0x01 vs 0x06).
+> ```python
+> CryptoPy.SHA3("msg", {"outputLength": 256})                    # Keccak (default)
+> CryptoPy.SHA3("msg", {"outputLength": 256, "variant": "sha3"}) # FIPS SHA-3
+> ```
 
 ### HMAC
 

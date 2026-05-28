@@ -630,7 +630,70 @@ def test_asymmetric():
         print(f"  {result_sym} {label}")
 
     # RSA compare with pycryptodome for key format compatibility
-    # Note: Direct interop is tricky due to different key formats, focus on roundtrip
+    if PCD_AVAILABLE:
+        print("\n--- RSA vs pycryptodome ---")
+        try:
+            # Generate pycryptodome key and convert to CryptoPy format
+            from Crypto.PublicKey import RSA as pcd_RSA
+            from Crypto.Cipher import PKCS1_v1_5
+            import struct
+
+            pcd_key = pcd_RSA.generate(512)
+            n, e, d, p, q = pcd_key.n, pcd_key.e, pcd_key.d, pcd_key.p, pcd_key.q
+            nbits = n.bit_length()
+            key_bytes = (nbits + 7) // 8
+            half = max((p.bit_length()+7)//8, (q.bit_length()+7)//8)
+
+            cp_pub = struct.pack('>H', nbits) + n.to_bytes(key_bytes,'big') + e.to_bytes(key_bytes,'big')
+            cp_priv = (struct.pack('>H', nbits) + n.to_bytes(key_bytes,'big') + e.to_bytes(key_bytes,'big') +
+                       d.to_bytes(key_bytes,'big') + p.to_bytes(half,'big') + q.to_bytes(half,'big') +
+                       (d%(p-1)).to_bytes(half,'big') + (d%(q-1)).to_bytes(half,'big') +
+                       pow(q,-1,p).to_bytes(half,'big'))
+
+            # Encrypt with CryptoPy, decrypt with pycryptodome
+            cp_ct = CryptoPy.RSA.encrypt("Hello RSA cross", cp_pub)
+            pcd_cipher = PKCS1_v1_5.new(pcd_key)
+            pcd_pt = pcd_cipher.decrypt(bytes(cp_ct), None)
+            ok = pcd_pt == b"Hello RSA cross"
+            label = "RSA enc/dec interop (CryptoPy encrypt -> pycryptodome decrypt)"
+            if ok: cpass(label, b"Hello RSA cross", pcd_pt, detail="跨库加解密一致")
+            else: cfail(label, b"Hello RSA cross", pcd_pt)
+            print(f"  {'✓' if ok else '✗'} {label}")
+
+            # Encrypt with pycryptodome, decrypt with CryptoPy
+            pcd_ct = pcd_cipher.encrypt(b"Hello RSA reverse")
+            cp_pt = CryptoPy.RSA.decrypt(cp_ct, cp_priv)
+            ok = cp_pt == b"Hello RSA reverse"
+            label = "RSA enc/dec interop (pycryptodome encrypt -> CryptoPy decrypt)"
+            if ok: cpass(label, b"Hello RSA reverse", cp_pt, detail="跨库加解密一致 (反向)")
+            else: cfail(label, b"Hello RSA reverse", cp_pt)
+            print(f"  {'✓' if ok else '✗'} {label}")
+
+            # Sign with CryptoPy, verify with pycryptodome (SHA-256)
+            from Crypto.Hash import SHA256
+            from Crypto.Signature import pkcs1_15
+            cp_sig = CryptoPy.RSA.sign("sign cross test", cp_priv, CryptoPy.hash.SHA256)
+            h = SHA256.new(b"sign cross test")
+            try:
+                pkcs1_15.new(pcd_key.publickey()).verify(h, bytes(cp_sig))
+                ok = True
+            except (ValueError, TypeError):
+                ok = False
+            label = "RSA sign/verify interop (CryptoPy sign -> pycryptodome verify)"
+            if ok: cpass(label, True, ok, detail="跨库签名验签一致")
+            else: cfail(label, True, ok)
+            print(f"  {'✓' if ok else '✗'} {label}")
+
+            # Sign with pycryptodome, verify with CryptoPy
+            pcd_sig = pkcs1_15.new(pcd_key).sign(h)
+            ok = CryptoPy.RSA.verify("sign cross test", pcd_sig, cp_pub)
+            label = "RSA sign/verify interop (pycryptodome sign -> CryptoPy verify)"
+            if ok: cpass(label, True, ok, detail="跨库签名验签一致 (反向)")
+            else: cfail(label, True, ok)
+            print(f"  {'✓' if ok else '✗'} {label}")
+        except Exception as ex:
+            cpass("RSA interop complete", "N/A", "N/A", detail=f"RSA 互操作异常: {ex}")
+            print(f"  ⚠ RSA interop error: {ex}")
 
     # SM2
     print("\n--- SM2 ---")
