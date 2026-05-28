@@ -97,7 +97,7 @@ p4 = dec.finalize()
 | `CryptoPy.RIPEMD160(s)` | 160 bits | `CryptoPy.RIPEMD160("abc")` |
 | `CryptoPy.SM3(s)` | 256 bits | `CryptoPy.SM3("abc")` |
 
-**Note**: `SHA3` implements raw Keccak[c=2d] (matching CryptoJS), not FIPS 202 SHA-3. Output differs from `hashlib.sha3_512()`.
+> **⚠ SHA3 Note**: `SHA3` implements raw **Keccak[c=2d]** (matching CryptoJS), not FIPS 202 SHA-3. Output differs from Python's `hashlib.sha3_*()`. The only divergence in cross-validation across 103 test cases.
 
 ### HMAC
 
@@ -437,6 +437,25 @@ python3 -m build --sdist
 # Publish
 python3 -m twine upload dist/*
 ```
+
+## Standards Compliance
+
+103 cross-validation tests against Python stdlib (hashlib, hmac), pycryptodome, and gmssl-python. Full report: `demo/cross_validate_report.md`.
+
+| Algorithm Group | Test Vectors | hashlib/hmac | pycryptodome | gmssl-python | Status |
+|---|---|---|---|---|---|
+| MD5, SHA-1, SHA-256/384/512 | ✓ | ✓ | ✓ | N/A | ✅ Verified |
+| SHA224, RIPEMD160 | ✓ | ✓ | ✓ | N/A | ✅ Verified |
+| SHA3 (Keccak) | ✓ | ⚠ (FIPS) | ⚠ (FIPS) | N/A | ⚠ Keccak vs FIPS |
+| HMAC (all variants) | ✓ | ✓ | ✓ | N/A | ✅ Verified |
+| AES (ECB/CBC/CFB/OFB/CTR) | ✓ | N/A | ✓ | N/A | ✅ Verified |
+| DES, TripleDES | ✓ | N/A | ✓ | N/A | ✅ Verified |
+| PBKDF2, EvpKDF | ✓ | ✓ | N/A | N/A | ✅ Verified |
+| SM3 | ✓ | N/A | N/A | ✓ | ✅ Verified |
+| SM4 | ✓ | N/A | N/A | ✓ | ✅ Verified |
+| SM2, SM9, ZUC, RSA | self | N/A | N/A | N/A | ✅ Self-consistent |
+| Progressive API | ✓ | N/A | N/A | N/A | ✅ Verified |
+| Encoders (Base64, Hex, Utf8) | ✓ | ✓ | N/A | N/A | ✅ Verified |
 
 ## References
 

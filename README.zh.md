@@ -319,6 +319,25 @@ python3 -m build --sdist
 python3 -m twine upload dist/*
 ```
 
+## 标准合规与交叉验证
+
+103 项交叉验证测试已通过（对比 Python stdlib、pycryptodome、gmssl-python）。完整报告：`demo/cross_validate_report.md`。
+
+| 算法分类 | 测试向量 | hashlib/hmac | pycryptodome | gmssl-python | 状态 |
+|---|---|---|---|---|---|
+| MD5, SHA-1, SHA-256/384/512 | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
+| SHA224, RIPEMD160 | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
+| SHA3 (Keccak) | ✓ | ⚠ (FIPS) | ⚠ (FIPS) | N/A | ⚠ Keccak vs FIPS |
+| HMAC (全部) | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
+| AES (ECB/CBC/CFB/OFB/CTR) | ✓ | N/A | ✓ | N/A | ✅ 已验证 |
+| DES, TripleDES | ✓ | N/A | ✓ | N/A | ✅ 已验证 |
+| PBKDF2, EvpKDF | ✓ | ✓ | N/A | N/A | ✅ 已验证 |
+| SM3 | ✓ | N/A | N/A | ✓ | ✅ 已验证 |
+| SM4 | ✓ | N/A | N/A | ✓ | ✅ 已验证 |
+| SM2, SM9, ZUC, RSA | 自洽 | N/A | N/A | N/A | ✅ 自洽一致 |
+| 渐进式 API | ✓ | N/A | N/A | N/A | ✅ 已验证 |
+| 编码器 (Base64, Hex, Utf8) | ✓ | ✓ | N/A | N/A | ✅ 已验证 |
+
 ## 参考来源
 
 | 算法分类 | 来源 |
