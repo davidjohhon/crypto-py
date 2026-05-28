@@ -199,6 +199,19 @@ CryptoPy.SM9.verify(mpk, "alice@example.com", "message", sig)
 
 基于身份标识的签名系统，无需公钥证书，直接从用户标识（邮箱、手机号等）派生密钥。基于 BN 曲线上的 R-ate 配对实现，零外部依赖。从 GmSSL 移植。
 
+| 输出 | 长度 | 格式 |
+|------|------|------|
+| `mpk` | 128 字节 | `X.a0 \|\| X.a1 \|\| Y.a0 \|\| Y.a1` (G₂ 仿射) |
+| `msk` | 32 字节 | 标量 mod N |
+| `usk` | 192 字节 | `usk.X \|\| usk.Y (G₁ 仿射) \|\| mpk` |
+| `sig` | 96 字节 | `h \|\| S.X \|\| S.Y` |
+
+```python
+mpk.hex()   # -> "hex字符串"  (128 bytes → 256 chars)
+msk.hex()   # -> "hex字符串"  (32 bytes → 64 chars)
+usk.hex()   # -> "hex字符串"  (192 bytes → 384 chars)
+```
+
 #### RSA — 非对称加密 (PKCS#1 v1.5)
 
 ```python

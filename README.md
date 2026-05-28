@@ -228,6 +228,18 @@ plaintext = CryptoPy.SM2.decrypt(sk, ciphertext)
 
 254-bit elliptic curve public key cryptography. Supports digital signature, key exchange, and data encryption. Replaces RSA in Chinese standards.
 
+| Output | Size | Format |
+|--------|------|--------|
+| `sk` | 32 bytes | scalar d |
+| `pk` | 64 bytes | `Q.x \|\| Q.y` (G affine) |
+| `sig` | 64 bytes | `r \|\| s` |
+| `ct` | 97 bytes | `C1 \|\| C2 \|\| C3` |
+
+```python
+sk.hex()   # 32 bytes → 64 chars
+pk.hex()   # 64 bytes → 128 chars
+```
+
 #### SM9 — Identity-Based Cryptography (GM/T 0044-2016)
 
 ```python
@@ -243,6 +255,19 @@ CryptoPy.SM9.verify(master_pk, "alice@example.com", "message", sig)
 ```
 
 Identity-based signature system. Eliminates the need for public key certificates by deriving keys from user identity strings (email, phone, etc.). Full R-ate pairing over BN curves with zero third-party dependencies. Ported from GmSSL.
+
+| Output | Size | Format |
+|--------|------|--------|
+| `mpk` | 128 bytes | `X.a0 \|\| X.a1 \|\| Y.a0 \|\| Y.a1` (G₂ affine) |
+| `msk` | 32 bytes | scalar mod N |
+| `usk` | 192 bytes | `usk.X \|\| usk.Y (G₁ affine) \|\| mpk` |
+| `sig` | 96 bytes | `h \|\| S.X \|\| S.Y` |
+
+```python
+mpk.hex()   # -> "hex string"  (128 bytes → 256 chars)
+msk.hex()   # -> "hex string"  (32 bytes → 64 chars)
+usk.hex()   # -> "hex string"  (192 bytes → 384 chars)
+```
 
 #### RSA — Asymmetric Encryption (PKCS#1 v1.5)
 
@@ -260,6 +285,16 @@ ok  = CryptoPy.RSA.verify("message", sig, pub)  # returns hash name
 ```
 
 RSA public key cryptography with PKCS#1 v1.5 padding. Supports MD5, SHA-1, SHA-256, SHA-384, SHA-512 for signatures. Uses Chinese Remainder Theorem for fast decryption. Zero external dependencies.
+
+| Output | Size | Format |
+|--------|------|--------|
+| `pub` | ~key/4 bytes | `nbits(2) \|\| n \|\| e` |
+| `priv` | ~3×key/4 bytes | `nbits(2) \|\| n \|\| e \|\| d \|\| p \|\| q \|\| ...` |
+
+```python
+pub.hex()   # 512-bit key → ~130 chars, 2048-bit → ~520 chars
+priv.hex()  # 512-bit key → ~378 chars, 2048-bit → ~1540 chars
+```
 
 ### Key Derivation
 
