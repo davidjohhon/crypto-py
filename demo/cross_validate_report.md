@@ -1,6 +1,6 @@
 # CryptoPy 算法交叉验证报告
 
-生成时间: 2026-05-28 21:28:23
+生成时间: 2026-05-28 21:59:34
 Python: 3.9.6 (default, Apr 17 2026, 18:15:52) 
 [Clang 21.0.0 (clang-2100.1.1.101)]
 
@@ -17,12 +17,12 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 
 ## 总览
 
-- **总计测试项**: 106
-- **通过**: 106 (100.0%)
-- **失败**: 0 (0.0%)
-- **发现差异**: 0 项
+- **总计测试项**: 110
+- **通过**: 109 (99.1%)
+- **失败**: 1 (0.9%)
+- **发现差异**: 1 项
 
-### 哈希算法 (106/106)
+### 哈希算法 (109/110)
 
 | 测试项 | 状态 | 预期/参考 | CryptoPy | 说明 |
 |---|---|---|---|---|
@@ -91,6 +91,8 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | SM4 password roundtrip | ✓ | `Hello SM4` | `Hello SM4` | - |
 | ZUC encrypt/decrypt roundtrip | ✓ | `00000000000000000000000000000000` | `00000000000000000000000000000000` | - |
 | ZUC password roundtrip | ✓ | `Hello ZUC` | `Hello ZUC` | - |
+| gmalg ZUC matches GM/T 0001 standard (0x27bede74) | ✓ | `0x27bede74` | `0x27bede74` | - |
+| CryptoPy ZUC vs GM/T 0001 standard (known issue) | ✗ | `0x27bede74` | `0xe8db9c8e` | CryptoPy ZUC keystream differs from GM/T 0001 standard, self |
 | RSA encrypt/decrypt (512-bit) | ✓ | `b'Hello RSA'` | `b'Hello RSA'` | - |
 | RSA sign/verify (SHA256) | ✓ | `True` | `SHA-256` | - |
 | RSA sign with MD5 | ✓ | `True` | `MD5` | - |
@@ -105,9 +107,11 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | SM2 sign/verify (CryptoPy sign -> gmssl verify) | ✓ | `True` | `True` | 跨库签名验签一致 (ZA-SM3) |
 | SM2 sign/verify (gmssl sign -> CryptoPy verify) | ✓ | `True` | `True` | 跨库签名验签一致 (反向) |
 | SM2 enc/dec (CryptoPy encrypt -> gmssl decrypt) | ✓ | `b'SM2 enc interop'` | `b'SM2 enc interop'` | 跨库加解密一致 |
+| SM2 enc/dec (gmssl encrypt -> CryptoPy decrypt) | ✓ | `b'SM2 enc reverse'` | `b'SM2 enc reverse'` | 跨库加解密一致 (反向) |
 | SM9 sign length=96 | ✓ | `True` | `True` | - |
 | SM9 verify | ✓ | `True` | `True` | - |
 | SM9 reject wrong identity | ✓ | `False` | `False` | - |
+| gmalg SM9 sign/verify self-consistent | ✓ | `True` | `True` | - |
 | PBKDF2 (iterations=1, default keySize=128bit) | ✓ | `120fb6cffcf8b32c43e7225256c4f837` | `120fb6cffcf8b32c43e7225256c4f837` | - |
 | PBKDF2 vs hashlib (keySize=256bit, iter=1, SHA256) | ✓ | `120fb6cffcf8b32c43e7225256c4f837a86548c9` | `120fb6cffcf8b32c43e7225256c4f837a86548c9` | - |
 | PBKDF2 vs hashlib (keySize=256bit, iter=1000, SHA256) | ✓ | `632c2812e46d4604102ba7618e9d6d7d2f8128f6` | `632c2812e46d4604102ba7618e9d6d7d2f8128f6` | - |
@@ -132,6 +136,16 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | MD5 toString(Hex) == str(digest) | ✓ | `c4ca4238a0b923820dcc509a6f75849b` | `c4ca4238a0b923820dcc509a6f75849b` | - |
 | MD5 toString(Base64) | ✓ | `xMpCOKC5I4INzFCab3WEmw==` | `xMpCOKC5I4INzFCab3WEmw==` | - |
 | CipherParams toString consistency | ✓ | `True` | `True` | - |
+
+## 差异详情
+
+以下为 CryptoPy 与参考库/测试向量的不一致项：
+
+### CryptoPy ZUC vs GM/T 0001 standard (known issue)
+- **类型**: hash
+- **预期**: `0x27bede74`
+- **实际**: `0xe8db9c8e`
+- **说明**: CryptoPy ZUC keystream differs from GM/T 0001 standard, self-consistent roundtrip OK
 
 ## 互操作性总结
 

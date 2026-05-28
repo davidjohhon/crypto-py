@@ -589,6 +589,44 @@ def test_sm_ciphers():
         cfail(label, "Hello ZUC", dec_str)
     print(f"  {'✓' if ok else '✗'} {label}")
 
+    # ZUC vs gmalg keystream comparison
+    try:
+        from gmalg.zuc import ZUC as gmalg_ZUC
+        GMALG_AVAILABLE = True
+    except ImportError:
+        GMALG_AVAILABLE = False
+
+    if GMALG_AVAILABLE:
+        print("\n--- ZUC vs gmalg ---")
+        z = gmalg_ZUC(b'\x00'*16, b'\x00'*16)
+        gm_ks = b''
+        for _ in range(4):
+            gm_ks += z.generate()
+        gm_word0 = int.from_bytes(gm_ks[:4], 'big')
+        ok = gm_word0 == 0x27bede74
+        label = "gmalg ZUC matches GM/T 0001 standard (0x27bede74)"
+        if ok:
+            cpass(label, "0x27bede74", hex(gm_word0))
+        else:
+            cfail(label, "0x27bede74", hex(gm_word0))
+        print(f"  {'✓' if ok else '✗'} {label}")
+
+        # CryptoPy ZUC deviates from standard (known issue)
+        cp_key = CryptoPy.enc.Hex.parse('0'*32)
+        cp_iv = CryptoPy.enc.Hex.parse('0'*32)
+        cp_zp = CryptoPy.enc.Hex.parse('0'*32)
+        cp_ct = CryptoPy.ZUC.encrypt(cp_zp, cp_key, {'iv': cp_iv})
+        cp_words = cp_ct.ciphertext.words
+        cp_word0 = cp_words[0] if cp_words else 0
+        ok = cp_word0 == 0x27bede74
+        label = "CryptoPy ZUC vs GM/T 0001 standard (known issue)"
+        if ok:
+            cpass(label, "0x27bede74", hex(cp_word0))
+        else:
+            cfail(label, "0x27bede74", hex(cp_word0),
+                  detail="CryptoPy ZUC keystream differs from GM/T 0001 standard, self-consistent roundtrip OK")
+        print(f"  {'!' if not ok else '✓'} {label} (standard mismatch)")
+
 
 # ============================================================
 # 5. Asymmetric (RSA, SM2, SM9)
@@ -810,6 +848,34 @@ def test_asymmetric():
     else:
         cfail(label, False, True)
     print(f"  {'✓' if ok else '✗'} {label}")
+
+    # SM9 vs gmalg self-consistency
+    try:
+        from gmalg import SM9KGC, SM9 as gmalg_SM9
+        GMALG_SM9_AVAILABLE = True
+    except ImportError:
+        GMALG_SM9_AVAILABLE = False
+
+    if GMALG_SM9_AVAILABLE:
+        print("\n--- SM9 vs gmalg ---")
+        try:
+            kgc = SM9KGC(hid_s=b'\x01')
+            sign_pk, sign_sk = kgc.generate_keypair_sign()
+            mpk = kgc.generate_mpk_sign(sign_sk)
+            kgc2 = SM9KGC(hid_s=b'\x01', msk_s=sign_sk)
+            usk = kgc2.generate_sk_sign(b'alice')
+            sm9_sign = gmalg_SM9(hid_s=b'\x01', mpk_s=mpk, sk_s=usk)
+            msg = b'SM9 cross test'
+            h, S = sm9_sign.sign(msg)
+            sm9_verify = gmalg_SM9(hid_s=b'\x01', mpk_s=mpk, uid=b'alice')
+            ok = sm9_verify.verify(msg, h, S)
+            label = "gmalg SM9 sign/verify self-consistent"
+            if ok: cpass(label, True, ok)
+            else: cfail(label, True, ok)
+            print(f"  {'✓' if ok else '✗'} {label}")
+        except Exception as e:
+            cfail("gmalg SM9 test", "N/A", str(e)[:50], detail=f"异常: {e}")
+            print(f"  ✗ gmalg SM9: {e}")
 
 
 # ============================================================
