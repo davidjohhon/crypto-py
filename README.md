@@ -490,7 +490,8 @@ python3 -m twine upload dist/*
 | PBKDF2, EvpKDF | ✓ | ✓ | N/A | N/A | ✅ Verified |
 | SM3 | ✓ | N/A | N/A | ✓ | ✅ Verified |
 | SM4 | ✓ | N/A | N/A | ✓ | ✅ Verified |
-| SM2, SM9, ZUC | ✓ | N/A | N/A | N/A | ✅ Self-consistent |
+| SM2 | ✓ | N/A | N/A | ✓ | ✅ Cross-verified |
+| SM9, ZUC | ✓ | N/A | N/A | N/A | ✅ Self-consistent |
 | RSA (PKCS#1 v1.5) | ✓ | N/A | ✓ | N/A | ✅ Cross-verified |
 | Progressive API | ✓ | N/A | N/A | N/A | ✅ Verified |
 | Encoders (Base64, Hex, Utf8) | ✓ | ✓ | N/A | N/A | ✅ Verified |

@@ -1,6 +1,6 @@
 # CryptoPy 算法交叉验证报告
 
-生成时间: 2026-05-28 21:12:47
+生成时间: 2026-05-28 21:28:23
 Python: 3.9.6 (default, Apr 17 2026, 18:15:52) 
 [Clang 21.0.0 (clang-2100.1.1.101)]
 
@@ -18,11 +18,11 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 ## 总览
 
 - **总计测试项**: 106
-- **通过**: 105 (99.1%)
-- **失败**: 1 (0.9%)
-- **发现差异**: 1 项
+- **通过**: 106 (100.0%)
+- **失败**: 0 (0.0%)
+- **发现差异**: 0 项
 
-### 哈希算法 (105/106)
+### 哈希算法 (106/106)
 
 | 测试项 | 状态 | 预期/参考 | CryptoPy | 说明 |
 |---|---|---|---|---|
@@ -104,7 +104,7 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | SM2 encrypt/decrypt | ✓ | `b'SM2 secret'` | `b'SM2 secret'` | - |
 | SM2 sign/verify (CryptoPy sign -> gmssl verify) | ✓ | `True` | `True` | 跨库签名验签一致 (ZA-SM3) |
 | SM2 sign/verify (gmssl sign -> CryptoPy verify) | ✓ | `True` | `True` | 跨库签名验签一致 (反向) |
-| SM2 enc/dec (CryptoPy encrypt -> gmssl decrypt) | ✗ | `b'SM2 enc interop'` | `b'\x9cMKp\xe5jO\x8c\xc9B\x88#\` | KDF 实现差异导致解密失败 |
+| SM2 enc/dec (CryptoPy encrypt -> gmssl decrypt) | ✓ | `b'SM2 enc interop'` | `b'SM2 enc interop'` | 跨库加解密一致 |
 | SM9 sign length=96 | ✓ | `True` | `True` | - |
 | SM9 verify | ✓ | `True` | `True` | - |
 | SM9 reject wrong identity | ✓ | `False` | `False` | - |
@@ -132,16 +132,6 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | MD5 toString(Hex) == str(digest) | ✓ | `c4ca4238a0b923820dcc509a6f75849b` | `c4ca4238a0b923820dcc509a6f75849b` | - |
 | MD5 toString(Base64) | ✓ | `xMpCOKC5I4INzFCab3WEmw==` | `xMpCOKC5I4INzFCab3WEmw==` | - |
 | CipherParams toString consistency | ✓ | `True` | `True` | - |
-
-## 差异详情
-
-以下为 CryptoPy 与参考库/测试向量的不一致项：
-
-### SM2 enc/dec (CryptoPy encrypt -> gmssl decrypt)
-- **类型**: hash
-- **预期**: `b'SM2 enc interop'`
-- **实际**: `b'\x9cMKp\xe5jO\x8c\xc9B\x88#\`
-- **说明**: KDF 实现差异导致解密失败
 
 ## 互操作性总结
 

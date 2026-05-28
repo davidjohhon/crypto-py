@@ -194,7 +194,8 @@ def encrypt(public_key, message):
             break
     c2 = bytes(a ^ b for a, b in zip(message, t))
     c3 = _int_to(_hash(x2 + message + y2), 32)
-    return _int_to(c1.x) + _int_to(c1.y) + c3 + c2
+    # gmssl-compatible: C1 || C2 || C3 ordering (gm.decrypt reads C1||C2||C3)
+    return _int_to(c1.x) + _int_to(c1.y) + c2 + c3
 
 
 def decrypt(private_key, ciphertext):
@@ -202,8 +203,8 @@ def decrypt(private_key, ciphertext):
     d = _int_from(private_key)
     cx = _int_from(ciphertext[:32])
     cy = _int_from(ciphertext[32:64])
-    c3 = ciphertext[64:96]
-    c2 = ciphertext[96:]
+    c2 = ciphertext[64:-32]
+    c3 = ciphertext[-32:]
     p = _mul(d, _Point(cx, cy))
     x2, y2 = _int_to(p.x), _int_to(p.y)
     t = _kdf(x2 + y2, len(c2) * 8)

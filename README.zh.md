@@ -347,7 +347,8 @@ python3 -m twine upload dist/*
 | PBKDF2, EvpKDF | ✓ | ✓ | N/A | N/A | ✅ 已验证 |
 | SM3 | ✓ | N/A | N/A | ✓ | ✅ 已验证 |
 | SM4 | ✓ | N/A | N/A | ✓ | ✅ 已验证 |
-| SM2, SM9, ZUC | ✓ | N/A | N/A | N/A | ✅ 自洽一致 |
+| SM2 | ✓ | N/A | N/A | ✓ | ✅ 交叉验证 |
+| SM9, ZUC | ✓ | N/A | N/A | N/A | ✅ 自洽一致 |
 | RSA (PKCS#1 v1.5) | ✓ | N/A | ✓ | N/A | ✅ 交叉验证 |
 | 渐进式 API | ✓ | N/A | N/A | N/A | ✅ 已验证 |
 | 编码器 (Base64, Hex, Utf8) | ✓ | ✓ | N/A | N/A | ✅ 已验证 |

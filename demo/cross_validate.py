@@ -759,17 +759,23 @@ def test_asymmetric():
             else: cfail(label, True, ok)
             print(f"  {'✓' if ok else '✗'} {label}")
 
-            # 3. Encrypt/decrypt interop (known KDF difference, noted)
+            # 3. Encrypt/decrypt interop (both directions, gmssl-compatible format)
             cp_ct = CryptoPy.SM2.encrypt(pk, b"SM2 enc interop")
-            try:
-                gm_pt = gm.decrypt(cp_ct)
-                ok = gm_pt == b"SM2 enc interop"
-            except Exception:
-                ok = False; gm_pt = None
+            gm_pt = gm.decrypt(cp_ct)
+            ok = gm_pt == b"SM2 enc interop"
             label = "SM2 enc/dec (CryptoPy encrypt -> gmssl decrypt)"
             if ok: cpass(label, b"SM2 enc interop", gm_pt, detail="跨库加解密一致")
-            else: cfail(label, b"SM2 enc interop", str(gm_pt)[:30] if gm_pt else "N/A", detail="KDF 实现差异导致解密失败")
-            print(f"  {'✓' if ok else '⚠'} {label} (KDF diff)")
+            else: cfail(label, b"SM2 enc interop", str(gm_pt)[:30] if gm_pt else "N/A", detail="加解密互操作失败")
+            print(f"  {'✓' if ok else '✗'} {label}")
+
+            # 4. gmssl encrypt -> CryptoPy decrypt
+            gm_ct = gm.encrypt(b"SM2 enc reverse")
+            cp_pt = CryptoPy.SM2.decrypt(sk, gm_ct)
+            ok = cp_pt == b"SM2 enc reverse"
+            label = "SM2 enc/dec (gmssl encrypt -> CryptoPy decrypt)"
+            if ok: cpass(label, b"SM2 enc reverse", cp_pt, detail="跨库加解密一致 (反向)")
+            else: cfail(label, b"SM2 enc reverse", str(cp_pt)[:30] if cp_pt else "N/A", detail="加解密互操作失败")
+            print(f"  {'✓' if ok else '✗'} {label}")
 
         except Exception as ex:
             import traceback
