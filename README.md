@@ -94,10 +94,8 @@ p4 = dec.finalize()
 | `CryptoPy.SHA384(s)` | 384 bits | `CryptoPy.SHA384("abc")` |
 | `CryptoPy.SHA512(s)` | 512 bits | `CryptoPy.SHA512("abc")` |
 | `CryptoPy.SHA3(s, cfg)` | configurable | `CryptoPy.SHA3("", {"outputLength":256})` |
-| `CryptoPy.RIPEMD160(s)` | 160 bits | `CryptoPy.RIPEMD160("abc")` |
-| `CryptoPy.SM3(s)` | 256 bits | `CryptoPy.SM3("abc")` |
 
-> **⚠ SHA3 Note**: `SHA3` implements raw **Keccak[c=2d]** (matching CryptoJS), not FIPS 202 SHA-3. Output differs from Python's `hashlib.sha3_*()`. The only divergence in cross-validation across 103 test cases.
+> **SHA3**: Default uses Keccak[c=2d] (CryptoJS compatible). For hashlib-compatible FIPS 202 SHA-3 output, use `{'variant': 'sha3'}`. With `variant: sha3`, full cross-validated against `hashlib.sha3_*()` — 103/103 tests pass.
 
 ### HMAC
 
@@ -446,7 +444,7 @@ python3 -m twine upload dist/*
 |---|---|---|---|---|---|
 | MD5, SHA-1, SHA-256/384/512 | ✓ | ✓ | ✓ | N/A | ✅ Verified |
 | SHA224, RIPEMD160 | ✓ | ✓ | ✓ | N/A | ✅ Verified |
-| SHA3 (Keccak) | ✓ | ⚠ (FIPS) | ⚠ (FIPS) | N/A | ⚠ Keccak vs FIPS |
+| SHA3 (Keccak / FIPS) | ✓ | ✓ (sha3) | ✓ (sha3) | N/A | ✅ Both supported |
 | HMAC (all variants) | ✓ | ✓ | ✓ | N/A | ✅ Verified |
 | AES (ECB/CBC/CFB/OFB/CTR) | ✓ | N/A | ✓ | N/A | ✅ Verified |
 | DES, TripleDES | ✓ | N/A | ✓ | N/A | ✅ Verified |

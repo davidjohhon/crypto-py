@@ -327,7 +327,7 @@ python3 -m twine upload dist/*
 |---|---|---|---|---|---|
 | MD5, SHA-1, SHA-256/384/512 | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
 | SHA224, RIPEMD160 | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
-| SHA3 (Keccak) | ✓ | ⚠ (FIPS) | ⚠ (FIPS) | N/A | ⚠ Keccak vs FIPS |
+| SHA3 (Keccak / FIPS) | ✓ | ✓ (sha3) | ✓ (sha3) | N/A | ✅ 两种均支持 |
 | HMAC (全部) | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
 | AES (ECB/CBC/CFB/OFB/CTR) | ✓ | N/A | ✓ | N/A | ✅ 已验证 |
 | DES, TripleDES | ✓ | N/A | ✓ | N/A | ✅ 已验证 |

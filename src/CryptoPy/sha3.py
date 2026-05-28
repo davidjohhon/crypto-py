@@ -1,15 +1,16 @@
 """
 sha3.py — Keccak hash algorithm (pure Python).
 
-This implements raw Keccak[c=2d] (the algorithm used by CryptoJS),
-NOT the FIPS 202 standardized SHA-3.  The two differ in the domain
-separation byte prepended before the padding: raw Keccak uses 0x01,
-while FIPS 202 SHA-3 uses 0x06.  Standard hashlib.sha3_512() will
-produce different output from CryptoPy.SHA3() for the same input.
+Default: raw Keccak[c=2d] (CryptoJS compatible, domain byte 0x01).
+FIPS SHA-3: pass `{'variant': 'sha3'}` for hashlib-compatible output (domain byte 0x06).
 """
 
 import math
 from CryptoPy.core import WordArray, Hasher, _32
+
+
+_KECCAK_DOMAIN = 0x01
+_FIPS_SHA3_DOMAIN = 0x06
 
 
 RHO = [0, 1, 62, 28, 27, 36, 44, 6, 55, 20, 3, 10, 43, 25, 39, 41, 45, 15, 21, 8, 18, 2, 61, 56, 14]
@@ -66,11 +67,15 @@ class SHA3(Hasher):
     def init(self, cfg=None):
         if cfg is None:
             out_len = 512
+            variant = 'keccak'
         elif isinstance(cfg, dict):
             out_len = cfg.get('outputLength', 512)
+            variant = cfg.get('variant', 'keccak')
         else:
             out_len = getattr(cfg, 'outputLength', 512)
-        super().init(type('cfg', (), {'outputLength': out_len})())
+            variant = getattr(cfg, 'variant', 'keccak')
+        super().init(type('cfg', (), {'outputLength': out_len, 'variant': variant})())
+        self._domain_byte = _FIPS_SHA3_DOMAIN if variant == 'sha3' else _KECCAK_DOMAIN
 
     def _doReset(self):
         self._state = [0] * 25
@@ -100,7 +105,7 @@ class SHA3(Hasher):
 
         while len(dataWords) <= (nBitsLeft >> 5):
             dataWords.append(0)
-        dataWords[nBitsLeft >> 5] = _32(dataWords[nBitsLeft >> 5] | (0x1 << (24 - nBitsLeft % 32)))
+        dataWords[nBitsLeft >> 5] = _32(dataWords[nBitsLeft >> 5] | (self._domain_byte << (24 - nBitsLeft % 32)))
 
         lastIdx = (int(math.ceil((nBitsLeft + 1) / blockSizeBits)) * blockSizeBits >> 5) - 1
         while len(dataWords) <= lastIdx:
