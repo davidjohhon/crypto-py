@@ -483,14 +483,15 @@ python3 -m twine upload dist/*
 |---|---|---|---|---|---|
 | MD5, SHA-1, SHA-256/384/512 | ✓ | ✓ | ✓ | N/A | ✅ Verified |
 | SHA224, RIPEMD160 | ✓ | ✓ | ✓ | N/A | ✅ Verified |
-| SHA3 (Keccak / FIPS) | ✓ | ✓ (sha3) | ✓ (sha3) | N/A | ✅ Both supported |
+| SHA3 (Keccak / FIPS) | ✓ | ✓ | ✓ (sha3) | N/A | ✅ Both supported |
 | HMAC (all variants) | ✓ | ✓ | ✓ | N/A | ✅ Verified |
 | AES (ECB/CBC/CFB/OFB/CTR) | ✓ | N/A | ✓ | N/A | ✅ Verified |
 | DES, TripleDES | ✓ | N/A | ✓ | N/A | ✅ Verified |
 | PBKDF2, EvpKDF | ✓ | ✓ | N/A | N/A | ✅ Verified |
 | SM3 | ✓ | N/A | N/A | ✓ | ✅ Verified |
 | SM4 | ✓ | N/A | N/A | ✓ | ✅ Verified |
-| SM2, SM9, ZUC, RSA | self | N/A | N/A | N/A | ✅ Self-consistent |
+| SM2, SM9, ZUC | ✓ | N/A | N/A | N/A | ✅ Self-consistent |
+| RSA (PKCS#1 v1.5) | ✓ | N/A | ✓ | N/A | ✅ Cross-verified |
 | Progressive API | ✓ | N/A | N/A | N/A | ✅ Verified |
 | Encoders (Base64, Hex, Utf8) | ✓ | ✓ | N/A | N/A | ✅ Verified |
 

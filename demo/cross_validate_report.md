@@ -1,6 +1,6 @@
 # CryptoPy 算法交叉验证报告
 
-生成时间: 2026-05-28 19:42:50
+生成时间: 2026-05-28 19:46:00
 Python: 3.9.6 (default, Apr 17 2026, 18:15:52) 
 [Clang 21.0.0 (clang-2100.1.1.101)]
 
@@ -18,11 +18,11 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 ## 总览
 
 - **总计测试项**: 104
-- **通过**: 100 (96.2%)
-- **失败**: 4 (3.8%)
-- **发现差异**: 4 项
+- **通过**: 104 (100.0%)
+- **失败**: 0 (0.0%)
+- **发现差异**: 0 项
 
-### 哈希算法 (100/104)
+### 哈希算法 (104/104)
 
 | 测试项 | 状态 | 预期/参考 | CryptoPy | 说明 |
 |---|---|---|---|---|
@@ -59,10 +59,10 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | RIPEMD160 vs pycryptodome | ✓ | `8eb208f7e05d987a9b044a8e98c6b087f15a0bfc` | `8eb208f7e05d987a9b044a8e98c6b087f15a0bfc` | - |
 | SM3 vs gmssl-python | ✓ | `66c7f0f462eeedd9d1f2d46bdc10e4e24167c487` | `66c7f0f462eeedd9d1f2d46bdc10e4e24167c487` | - |
 | SM3('') vs gmssl-python | ✓ | `1ab21d8355cfa17f8e61194831e81a8f22bec8c7` | `1ab21d8355cfa17f8e61194831e81a8f22bec8c7` | - |
-| SHA3-224 vs hashlib (Keccak vs FIPS, 预期差异) | ✗ | `e642824c3f8cf24ad09234ee7d3c766fc9a3a516` | `c30411768506ebe1c2871b1ee2e87d38df342317` | CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 S |
-| SHA3-256 vs hashlib (Keccak vs FIPS, 预期差异) | ✗ | `3a985da74fe225b2045c172d6bd390bd855f086e` | `4e03657aea45a94fc7d47ba826c8d667c0d1e6e3` | CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 S |
-| SHA3-384 vs hashlib (Keccak vs FIPS, 预期差异) | ✗ | `ec01498288516fc926459f58e2c6ad8df9b473cb` | `f7df1165f033337be098e7d288ad6a2f74409d7a` | CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 S |
-| SHA3-512 vs hashlib (Keccak vs FIPS, 预期差异) | ✗ | `b751850b1a57168a5693cd924b6b096e08f62182` | `18587dc2ea106b9a1563e32b3312421ca164c7f1` | CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 S |
+| SHA3-224 vs hashlib (variant='sha3') | ✓ | `e642824c3f8cf24ad09234ee7d3c766fc9a3a516` | `e642824c3f8cf24ad09234ee7d3c766fc9a3a516` | FIPS 202 模式下与 hashlib 一致 |
+| SHA3-256 vs hashlib (variant='sha3') | ✓ | `3a985da74fe225b2045c172d6bd390bd855f086e` | `3a985da74fe225b2045c172d6bd390bd855f086e` | FIPS 202 模式下与 hashlib 一致 |
+| SHA3-384 vs hashlib (variant='sha3') | ✓ | `ec01498288516fc926459f58e2c6ad8df9b473cb` | `ec01498288516fc926459f58e2c6ad8df9b473cb` | FIPS 202 模式下与 hashlib 一致 |
+| SHA3-512 vs hashlib (variant='sha3') | ✓ | `b751850b1a57168a5693cd924b6b096e08f62182` | `b751850b1a57168a5693cd924b6b096e08f62182` | FIPS 202 模式下与 hashlib 一致 |
 | HmacMD5 vs stdlib hmac | ✓ | `d2fe98063f876b03193afb49b4979591` | `d2fe98063f876b03193afb49b4979591` | - |
 | HmacSHA1 vs stdlib hmac | ✓ | `4fd0b215276ef12f2b3e4c8ecac2811498b656fc` | `4fd0b215276ef12f2b3e4c8ecac2811498b656fc` | - |
 | HmacSHA256 vs stdlib hmac | ✓ | `9c196e32dc0175f86f4b1cb89289d6619de6bee6` | `9c196e32dc0175f86f4b1cb89289d6619de6bee6` | - |
@@ -130,34 +130,6 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | MD5 toString(Hex) == str(digest) | ✓ | `c4ca4238a0b923820dcc509a6f75849b` | `c4ca4238a0b923820dcc509a6f75849b` | - |
 | MD5 toString(Base64) | ✓ | `xMpCOKC5I4INzFCab3WEmw==` | `xMpCOKC5I4INzFCab3WEmw==` | - |
 | CipherParams toString consistency | ✓ | `True` | `True` | - |
-
-## 差异详情
-
-以下为 CryptoPy 与参考库/测试向量的不一致项：
-
-### SHA3-224 vs hashlib (Keccak vs FIPS, 预期差异)
-- **类型**: hash
-- **预期**: `e642824c3f8cf24ad09234ee7d3c766fc9a3a5168d0c94ad73b46fdf`
-- **实际**: `c30411768506ebe1c2871b1ee2e87d38df342317300a9b97a95ec6a8`
-- **说明**: CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 SHA-3 (域分隔符不同)
-
-### SHA3-256 vs hashlib (Keccak vs FIPS, 预期差异)
-- **类型**: hash
-- **预期**: `3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532`
-- **实际**: `4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45`
-- **说明**: CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 SHA-3 (域分隔符不同)
-
-### SHA3-384 vs hashlib (Keccak vs FIPS, 预期差异)
-- **类型**: hash
-- **预期**: `ec01498288516fc926459f58e2c6ad8df9b473cb0fc08c2596da7cf0e49be4b298d88cea927ac7f539f1edf228376d25`
-- **实际**: `f7df1165f033337be098e7d288ad6a2f74409d7a60b49c36642218de161b1f99f8c681e4afaf31a34db29fb763e3c28e`
-- **说明**: CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 SHA-3 (域分隔符不同)
-
-### SHA3-512 vs hashlib (Keccak vs FIPS, 预期差异)
-- **类型**: hash
-- **预期**: `b751850b1a57168a5693cd924b6b096e08f621827444f70d884f5d0240d2712e10e116e9192af3c91a7ec57647e3934057340b4cf408d5a56592f827`
-- **实际**: `18587dc2ea106b9a1563e32b3312421ca164c7f1f07bc922a9c83d77cea3a1e5d0c69910739025372dc14ac9642629379540c17e2a65b19d77aa511a`
-- **说明**: CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 SHA-3 (域分隔符不同)
 
 ## 互操作性总结
 

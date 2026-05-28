@@ -267,16 +267,22 @@ def test_hashes():
         print(f"  {sym} SM3('') (gmssl): {cp_result[:32]}...")
 
     # SHA3: CryptoPy uses Keccak (CryptoJS compatible), stdlib uses FIPS SHA3
-    print("  [!] SHA3: CryptoPy 使用原始 Keccak (CryptoJS 兼容)，hashlib 使用 FIPS 202 SHA-3 — 预期不一致")
+    # Test BOTH variants
+    print("  [!] SHA3: CryptoPy default=Keccak (CryptoJS兼容), variant='sha3'=FIPS 202 (hashlib兼容)")
     for bits in [224, 256, 384, 512]:
-        cp_result = str(CryptoPy.SHA3("abc", {"outputLength": bits}))
+        cp_keccak = str(CryptoPy.SHA3("abc", {"outputLength": bits}))
+        cp_fips = str(CryptoPy.SHA3("abc", {"outputLength": bits, "variant": "sha3"}))
         if hasattr(hashlib, f'sha3_{bits}'):
             hl_fn = getattr(hashlib, f'sha3_{bits}')
             hl_result = hl_fn(b"abc").hexdigest()
-            label = f"SHA3-{bits} vs hashlib (Keccak vs FIPS, 预期差异)"
-            cfail(label, hl_result, cp_result,
-                  detail="CryptoPy 使用 Keccak[c=2d] (CryptoJS 兼容)，hashlib 使用 FIPS 202 SHA-3 (域分隔符不同)")
-            print(f"  ⚠ SHA3-{bits}: CryptoPy(Keccak)={cp_result[:32]}...  hashlib(FIPS)={hl_result[:32]}...")
+            ok = cp_fips == hl_result
+            label = f"SHA3-{bits} vs hashlib (variant='sha3')"
+            if ok:
+                cpass(label, hl_result, cp_fips, detail="FIPS 202 模式下与 hashlib 一致")
+            else:
+                cfail(label, hl_result, cp_fips)
+            sym = "✓" if ok else "✗"
+            print(f"  {sym} SHA3-{bits}: Keccak={cp_keccak[:24]}... FIPS={cp_fips[:24]}... hashlib={hl_result[:24]}...")
 
 
 # ============================================================
