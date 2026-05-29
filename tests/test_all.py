@@ -467,6 +467,45 @@ def test_openssl_format():
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
+def test_hmac_bytes_input():
+    """HMAC should accept str, bytes, or WordArray for both message and key."""
+    print("HMAC bytes input:")
+    ok = True
+    tag1 = CryptoPy.HmacSHA256(b'message', b'key')
+    tag2 = CryptoPy.HmacSHA256('message', b'key')
+    tag3 = CryptoPy.HmacSHA256(b'message', 'key')
+    tag4 = CryptoPy.HmacSHA256('message', 'key')
+    # All combinations should produce same result
+    ok &= assert_eq("bytes+bytes", str(tag1), str(tag4))
+    ok &= assert_eq("str+bytes", str(tag2), str(tag4))
+    ok &= assert_eq("bytes+str", str(tag3), str(tag4))
+    # HMAC with bytes key (WordArray key from hex)
+    key_wa = CryptoPy.enc.Hex.parse("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")
+    tag5 = CryptoPy.HmacSHA256("Hi There", key_wa)
+    ok &= assert_eq("known vector",
+        str(tag5), '492ce020fe2534a5789dc3848806c78f4f6711397f08e7e7a12ca5a4483c8aa6')
+    print(f"  {'PASS' if ok else 'FAIL'}")
+
+
+def test_pbkdf2_defaults():
+    """PBKDF2 default iterations=1 should be fast."""
+    print("PBKDF2 defaults:")
+    ok = True
+    import time
+    t0 = time.time()
+    key = CryptoPy.PBKDF2("password", "salt", {"iterations": 1})
+    dt = time.time() - t0
+    ok &= dt < 2.0  # should complete in < 2 seconds
+    ok &= assert_eq("iter=1", str(key), "120fb6cffcf8b32c43e7225256c4f837")
+    # Without explicit iterations should also be fast (default=1)
+    t0 = time.time()
+    key2 = CryptoPy.PBKDF2("password", "salt")
+    dt2 = time.time() - t0
+    ok &= dt2 < 2.0
+    ok &= assert_eq("no cfg", str(key2), "120fb6cffcf8b32c43e7225256c4f837")
+    print(f"  {'PASS' if ok else 'FAIL'} (took {dt:.3f}s / {dt2:.3f}s)")
+
+
 def test_sm3():
     print("SM3:")
     ok = True
@@ -770,6 +809,7 @@ if __name__ == '__main__':
         test_progressive, test_openssl_format, test_to_string,
         test_sm3, test_sm4, test_zuc, test_sm2, test_sm9, test_rsa,
         test_type_conversions,
+        test_hmac_bytes_input, test_pbkdf2_defaults,
     ]
     passed = failed = 0
     for t in tests:

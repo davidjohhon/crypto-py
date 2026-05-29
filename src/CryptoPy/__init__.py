@@ -161,6 +161,23 @@ class _x64:
 x64 = _x64()
 
 
+def _bytes_to_wa(data):
+    """Convert bytes to WordArray (4 bytes per 32-bit word)."""
+    words = []
+    for i in range(0, len(data), 4):
+        chunk = data[i:i + 4]
+        if len(chunk) < 4:
+            chunk += b'\x00' * (4 - len(chunk))
+        words.append(int.from_bytes(chunk, 'big'))
+    return WordArray.create(words, len(data))
+
+
+class _util:
+    bytes_to_wa = staticmethod(_bytes_to_wa)
+
+util = _util()
+
+
 MD5 = Hasher._createHelper(_MD5)
 SHA1 = Hasher._createHelper(_SHA1)
 SHA256 = Hasher._createHelper(_SHA256)

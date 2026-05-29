@@ -99,7 +99,7 @@ All data in CryptoPy is represented as **WordArray** (32-bit words + byte count)
 |-----------|------|---------|
 | `str` → WordArray | `enc.Utf8.parse(s)` | `enc.Utf8.parse("Hello")` |
 | `hex` → WordArray | `enc.Hex.parse(h)` | `enc.Hex.parse("48656c6c6f")` |
-| `bytes` → WordArray | `bytes_to_wa(b)` (see example) | packs 4 bytes per 32-bit word |
+| `bytes` → WordArray | `CryptoPy.util.bytes_to_wa(b)` | `CryptoPy.util.bytes_to_wa(b"Hello")` |
 | WordArray → `str` | `wa.toString(enc.Utf8)` | `wa.toString(enc.Utf8)` → `"Hello"` |
 | WordArray → `hex` | `wa.toString()` or `str(wa)` | `wa.toString()` → `"48656c6c6f"` |
 | WordArray → `Base64` | `wa.toString(enc.Base64)` | `wa.toString(enc.Base64)` → `"SGVsbG8="` |
@@ -119,12 +119,8 @@ random_wa = CryptoPy.lib.WordArray.random(16)          # random bytes
 
 # All equal: from_hex == from_utf8 == from_b64
 
-# ── Bytes → WordArray (pack 4 bytes per 32-bit word) ──
-def bytes_to_wa(b):
-    words = [int.from_bytes(b[i:i+4], 'big') for i in range(0, len(b), 4)]
-    return CryptoPy.lib.WordArray.create(words, len(b))
-
-wa = bytes_to_wa(b"Hello")                          # same as enc.Utf8.parse("Hello")
+# ── Bytes → WordArray (using built-in utility) ──
+wa = CryptoPy.util.bytes_to_wa(b"Hello")            # same as enc.Utf8.parse("Hello")
 
 # ── Output conversions ──
 from_hex.toString()                                # hex: "48656c6c6f"
@@ -624,12 +620,8 @@ print("SHA256:", digest.toString(CryptoPy.enc.Base64))  # Base64
 digest = CryptoPy.SM3(data)
 print("SM3:", digest)
 
-# Explicit WordArray from bytes (pack 4 bytes per word)
-def bytes_to_wa(b):
-    words = [int.from_bytes(b[i:i+4], 'big') for i in range(0, len(b), 4)]
-    return CryptoPy.lib.WordArray.create(words, len(b))
-
-wa = bytes_to_wa(data)
+# Explicit WordArray from bytes
+wa = CryptoPy.util.bytes_to_wa(data)
 digest = CryptoPy.MD5(wa)
 print("MD5:", digest)
 ```

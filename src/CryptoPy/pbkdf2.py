@@ -30,7 +30,7 @@ class PBKDF2(Base):
     """
 
     def init(self, cfg=None):
-        self.cfg = type('cfg', (), {'keySize': 128 // 32, 'hasher': SHA256, 'iterations': 250000})()
+        self.cfg = type('cfg', (), {'keySize': 128 // 32, 'hasher': SHA256, 'iterations': 1})()
         if cfg:
             for k, v in cfg.items():
                 setattr(self.cfg, k, v)

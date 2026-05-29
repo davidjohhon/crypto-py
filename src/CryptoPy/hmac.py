@@ -10,7 +10,7 @@ Where:
   - opad = 0x5C5C5C... (block size bytes).
 """
 
-from CryptoPy.core import Base, Utf8
+from CryptoPy.core import Base, WordArray, Utf8
 
 
 class HMAC(Base):
@@ -28,6 +28,14 @@ class HMAC(Base):
         hasher = self._hasher = hasher_cls.create()
         if isinstance(key, str):
             key = Utf8.parse(key)
+        elif isinstance(key, (bytes, bytearray)):
+            words = []
+            for i in range(0, len(key), 4):
+                chunk = key[i:i + 4]
+                if len(chunk) < 4:
+                    chunk += b'\x00' * (4 - len(chunk))
+                words.append(int.from_bytes(chunk, 'big'))
+            key = WordArray.create(words, len(key))
 
         hasherBlockSize = hasher.blockSize
         hasherBlockSizeBytes = hasherBlockSize * 4

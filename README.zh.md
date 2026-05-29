@@ -24,7 +24,7 @@ CryptoPy 使用 **WordArray**（32 位字数组 + 字节数）作为通用二进
 |-----------|------|------|
 | `str` → WordArray | `enc.Utf8.parse(s)` | `enc.Utf8.parse("Hello")` |
 | `hex` → WordArray | `enc.Hex.parse(h)` | `enc.Hex.parse("48656c6c6f")` |
-| `bytes` → WordArray | 使用 `bytes_to_wa(b)` | 每 4 字节一个 word |
+| `bytes` → WordArray | `CryptoPy.util.bytes_to_wa(b)` | `CryptoPy.util.bytes_to_wa(b"Hello")` |
 | WordArray → `str` | `wa.toString(enc.Utf8)` | `"Hello"` |
 | WordArray → `hex` | `wa.toString()` 或 `str(wa)` | `"48656c6c6f"` |
 | WordArray → `Base64` | `wa.toString(enc.Base64)` | `"SGVsbG8="` |
@@ -39,12 +39,8 @@ from_hex = CryptoPy.enc.Hex.parse("48656c6c6f")
 from_utf8 = CryptoPy.enc.Utf8.parse("Hello")
 from_b64 = CryptoPy.enc.Base64.parse("SGVsbG8=")
 
-# bytes → WordArray（每 4 字节一个 32 位字）
-def bytes_to_wa(b):
-    words = [int.from_bytes(b[i:i+4], 'big') for i in range(0, len(b), 4)]
-    return CryptoPy.lib.WordArray.create(words, len(b))
-
-wa = bytes_to_wa(b"Hello")
+# bytes → WordArray（使用内置工具函数）
+wa = CryptoPy.util.bytes_to_wa(b"Hello")
 
 # 输出转换
 from_hex.toString()                                # "48656c6c6f"
