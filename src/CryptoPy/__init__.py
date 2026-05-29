@@ -219,13 +219,12 @@ class _util:
             ("SHA3-512",  lambda d: SHA3(d, {"outputLength": 512})),
         ]
         sep = "-" * 72
+        w = 96
         lines = [sep, "Digest Algorithms  | Bits | Result (hex)", sep]
         for name, fn in digests:
             result = fn(data)
-            bits = len(result) * 8
-            hex_str = result.toString()
-            display = hex_str[:56] + "..." if len(hex_str) > 60 else hex_str
-            lines.append(f"  {name:<18} | {bits:>4} | {display}")
+            h = result.toString()
+            lines.append(f"  {name:<18} | {len(result)*8:>4} | {h[:w]}{'...' if len(h)>w else ''}")
         lines.append(sep)
         output = "\n".join(lines)
         print(output)
@@ -377,23 +376,35 @@ class _util:
 
     @staticmethod
     def crypto_all(data, key=None, iv=None):
-        """Run all applicable algorithms (digest + HMAC + cipher) in one shot.
-        
-        Args:
-            data: input data (str/bytes/WordArray).
-            key: optional password for HMAC and cipher tests.
-            iv: optional IV for block cipher modes.
-        
-        Returns:
-            str: combined formatted output.
-        """
-        parts = [_util.digest_all(data)]
+        """Run all applicable algorithms (digest + HMAC + cipher) in one shot."""
+        sep = "-" * 72
+        w = 96  # display width for hex (SHA384 needs 96 chars)
+        out = [sep, "Digest Algorithms  | Bits | Result (hex)", sep]
+        for name, fn in [("MD5",MD5),("SHA1",SHA1),("RIPEMD160",RIPEMD160),
+                         ("SHA224",SHA224),("SM3",SM3),("SHA256",SHA256),
+                         ("SHA3-224",lambda d:SHA3(d,{"outputLength":224})),
+                         ("SHA3-256",lambda d:SHA3(d,{"outputLength":256})),
+                         ("SHA384",SHA384),
+                         ("SHA3-384",lambda d:SHA3(d,{"outputLength":384})),
+                         ("SHA512",SHA512),
+                         ("SHA3-512",lambda d:SHA3(d,{"outputLength":512}))]:
+            r = fn(data)
+            h = r.toString()
+            out.append(f"  {name:<18} | {len(r)*8:>4} | {h[:w]}{'...' if len(h)>w else ''}")
         if key:
-            parts.append(_util._hmac_all(data, key))
-            parts.append(_util.encrypt_all(data, key, iv))
-            parts.append(_util.decrypt_all(data, key, iv))
-        output = "\n".join(parts)
-        return output
+            out += [sep, "HMAC Algorithm     | Bits | Tag (hex)", sep]
+            for name,fn in [("HmacMD5",HmacMD5),("HmacSHA1",HmacSHA1),
+                            ("HmacRIPEMD160",HmacRIPEMD160),("HmacSHA224",HmacSHA224),
+                            ("HmacSM3",HmacSM3),("HmacSHA256",HmacSHA256),
+                            ("HmacSHA384",HmacSHA384),("HmacSHA512",HmacSHA512),
+                            ("HmacSHA3",HmacSHA3)]:
+                r = fn(data, key)
+                h = r.toString()
+                out.append(f"  {name:<18} | {len(r)*8:>4} | {h[:w]}{'...' if len(h)>w else ''}")
+        out.append(sep)
+        r = "\n".join(out)
+        print(r)
+        return r
 
     @staticmethod
     def _hmac_all(data, key):
@@ -410,13 +421,12 @@ class _util:
             ("HmacSHA3",      HmacSHA3),
         ]
         sep = "-" * 72
+        w = 96
         lines = [sep, "HMAC Algorithm     | Bits | Tag (hex)", sep]
         for name, fn in hmacs:
             result = fn(data, key)
-            bits = len(result) * 8
-            hex_str = result.toString()
-            display = hex_str[:56] + "..." if len(hex_str) > 60 else hex_str
-            lines.append(f"  {name:<18} | {bits:>4} | {display}")
+            h = result.toString()
+            lines.append(f"  {name:<18} | {len(result)*8:>4} | {h[:w]}{'...' if len(h)>w else ''}")
         lines.append(sep)
         output = "\n".join(lines)
         print(output)
