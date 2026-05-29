@@ -172,8 +172,255 @@ def _bytes_to_wa(data):
     return WordArray.create(words, len(data))
 
 
+def _derive_key(password, key_bytes):
+    """Derive key from password string using SHA256, truncated to key_bytes."""
+    from CryptoPy.sha256 import SHA256 as _SHA256_for_key
+    h = _SHA256_for_key.create()
+    h.update(password if isinstance(password, str) else str(password))
+    d = h.finalize()
+    raw = bytes([(d.words[i // 4] >> (24 - (i % 4) * 8)) & 0xFF for i in range(min(key_bytes, d.sigBytes))])
+    if key_bytes > d.sigBytes:
+        extra = bytes([0]) * (key_bytes - d.sigBytes)
+        raw = raw + extra
+    words = []
+    for i in range(0, len(raw), 4):
+        chunk = raw[i:i + 4]
+        if len(chunk) < 4:
+            chunk += b'\x00' * (4 - len(chunk))
+        words.append(int.from_bytes(chunk, 'big'))
+    return WordArray.create(words, len(raw))
+
+
 class _util:
     bytes_to_wa = staticmethod(_bytes_to_wa)
+
+    @staticmethod
+    def digest_all(data):
+        """Run all digest algorithms and print a comparison table.
+        
+        Args:
+            data: str, bytes, or WordArray to hash.
+        
+        Returns:
+            str: formatted table.
+        """
+        digests = [
+            ("MD5",       MD5),
+            ("SHA1",      SHA1),
+            ("RIPEMD160", RIPEMD160),
+            ("SHA224",    SHA224),
+            ("SM3",       SM3),
+            ("SHA256",    SHA256),
+            ("SHA3-224",  lambda d: SHA3(d, {"outputLength": 224})),
+            ("SHA3-256",  lambda d: SHA3(d, {"outputLength": 256})),
+            ("SHA384",    SHA384),
+            ("SHA3-384",  lambda d: SHA3(d, {"outputLength": 384})),
+            ("SHA512",    SHA512),
+            ("SHA3-512",  lambda d: SHA3(d, {"outputLength": 512})),
+        ]
+        sep = "-" * 72
+        lines = [sep, "Digest Algorithms  | Bits | Result (hex)", sep]
+        for name, fn in digests:
+            result = fn(data)
+            bits = len(result) * 8
+            hex_str = result.toString()
+            display = hex_str[:56] + "..." if len(hex_str) > 60 else hex_str
+            lines.append(f"  {name:<18} | {bits:>4} | {display}")
+        lines.append(sep)
+        output = "\n".join(lines)
+        print(output)
+        return output
+
+    @staticmethod
+    def encrypt_all(data, key, iv=None):
+        """Encrypt data with all symmetric ciphers and print a comparison table.
+        
+        Args:
+            data: plaintext (str, bytes, or WordArray).
+            key: password string for key derivation.
+            iv: optional IV string (for block cipher modes).
+        
+        Returns:
+            str: formatted table.
+        """
+        # Build cipher list: (name, cipher_class, key_bits, modes)
+        ciphers = []
+        for bits in [128, 256]:
+            ciphers.append((f"AES-{bits}-ECB", AES, bits, [mode.ECB]))
+            if iv:
+                ciphers.append((f"AES-{bits}-CBC", AES, bits, [mode.CBC]))
+                ciphers.append((f"AES-{bits}-CFB", AES, bits, [mode.CFB]))
+                ciphers.append((f"AES-{bits}-OFB", AES, bits, [mode.OFB]))
+                ciphers.append((f"AES-{bits}-CTR", AES, bits, [mode.CTR]))
+        ciphers.append(("DES-ECB",   DES, 64,  [mode.ECB]))
+        if iv:
+            ciphers.append(("DES-CBC",   DES, 64,  [mode.CBC]))
+        ciphers.append(("3DES-ECB",  TripleDES, 192, [mode.ECB]))
+        if iv:
+            ciphers.append(("3DES-CBC",  TripleDES, 192, [mode.CBC]))
+        ciphers.append(("SM4-ECB",   SM4, 128, [mode.ECB]))
+        if iv:
+            ciphers.append(("SM4-CBC",   SM4, 128, [mode.CBC]))
+        ciphers.append(("Rabbit",    Rabbit, 128, None))
+        ciphers.append(("RC4",       RC4, 128, None))
+        ciphers.append(("ZUC",       ZUC, 128, None))
+
+        sep = "-" * 72
+        lines = [sep, "Cipher            | KeySize | Ciphertext (hex)", sep]
+        for name, cls, key_bits, modes in ciphers:
+            try:
+                key_wa = _derive_key(key, key_bits // 8)
+                if modes is None:
+                    cfg = {}
+                    if iv:
+                        cfg['iv'] = _derive_key(iv, 16)
+                    ct = cls.encrypt(data, key_wa, cfg)
+                else:
+                    for m in modes:
+                        cfg = {'mode': m, 'padding': pad.Pkcs7}
+                        if m != mode.ECB:
+                            if iv:
+                                cfg['iv'] = _derive_key(iv, 16)
+                            else:
+                                cfg['iv'] = WordArray.create([0, 0, 0, 0], 16)
+                        ct = cls.encrypt(data, key_wa, cfg)
+                        ct_hex = ct.ciphertext.toString() if hasattr(ct, 'ciphertext') else str(ct)
+                        display = ct_hex[:56] + "..." if len(ct_hex) > 60 else ct_hex
+                        lines.append(f"  {name:<18} | {key_bits:>7} | {display}")
+            except Exception as e:
+                lines.append(f"  {name:<18} | {key_bits:>7} | ❌ {str(e)[:40]}")
+        lines.append(sep)
+        output = "\n".join(lines)
+        print(output)
+        return output
+
+    @staticmethod
+    def decrypt_all(data, key, iv=None):
+        """Test all cipher roundtrips: encrypt → decrypt → verify.
+        
+        Args:
+            data: plaintext (str, bytes, or WordArray).
+            key: password string for key derivation.
+            iv: optional IV string.
+        
+        Returns:
+            str: formatted table with PASS/FAIL.
+        """
+        if isinstance(data, str):
+            raw = data.encode()
+        elif isinstance(data, WordArray):
+            raw = bytes(data)
+        else:
+            raw = data
+
+        ref = _bytes_to_wa(raw)
+
+        ciphers = []
+        for bits in [128, 256]:
+            ciphers.append((f"AES-{bits}-ECB", AES, bits, [mode.ECB]))
+            if iv:
+                ciphers.append((f"AES-{bits}-CBC", AES, bits, [mode.CBC]))
+                ciphers.append((f"AES-{bits}-CFB", AES, bits, [mode.CFB]))
+                ciphers.append((f"AES-{bits}-OFB", AES, bits, [mode.OFB]))
+                ciphers.append((f"AES-{bits}-CTR", AES, bits, [mode.CTR]))
+        ciphers.append(("DES-ECB",   DES, 64,  [mode.ECB]))
+        if iv:
+            ciphers.append(("DES-CBC",   DES, 64,  [mode.CBC]))
+        ciphers.append(("3DES-ECB",  TripleDES, 192, [mode.ECB]))
+        if iv:
+            ciphers.append(("3DES-CBC",  TripleDES, 192, [mode.CBC]))
+        ciphers.append(("SM4-ECB",   SM4, 128, [mode.ECB]))
+        if iv:
+            ciphers.append(("SM4-CBC",   SM4, 128, [mode.CBC]))
+        ciphers.append(("Rabbit",    Rabbit, 128, None))
+        ciphers.append(("RC4",       RC4, 128, None))
+        ciphers.append(("ZUC",       ZUC, 128, None))
+
+        sep = "-" * 72
+        lines = [sep, "Cipher            | KeySize | Status", sep]
+        ok_count = 0
+        total = 0
+        for name, cls, key_bits, modes in ciphers:
+            try:
+                key_wa = _derive_key(key, key_bits // 8)
+                if modes is None:
+                    cfg = {}
+                    if iv:
+                        cfg['iv'] = _derive_key(iv, 16)
+                    ct = cls.encrypt(data, key_wa, cfg)
+                    pt = cls.decrypt(ct, key_wa, cfg)
+                else:
+                    for m in modes:
+                        cfg = {'mode': m, 'padding': pad.Pkcs7}
+                        if m != mode.ECB:
+                            if iv:
+                                cfg['iv'] = _derive_key(iv, 16)
+                            else:
+                                cfg['iv'] = WordArray.create([0, 0, 0, 0], 16)
+                        ct = cls.encrypt(data, key_wa, cfg)
+                        pt = cls.decrypt(ct, key_wa, cfg)
+                ok = str(pt) == str(ref)
+                total += 1
+                if ok:
+                    ok_count += 1
+                mark = "✅ PASS" if ok else "❌ FAIL"
+                lines.append(f"  {name:<18} | {key_bits:>7} | {mark}")
+            except Exception as e:
+                total += 1
+                lines.append(f"  {name:<18} | {key_bits:>7} | ❌ {str(e)[:30]}")
+        lines.append(sep)
+        lines.append(f"  Result: {ok_count}/{total} passed")
+        lines.append(sep)
+        output = "\n".join(lines)
+        print(output)
+        return output
+
+    @staticmethod
+    def crypto_all(data, key=None, iv=None):
+        """Run all applicable algorithms (digest + HMAC + cipher) in one shot.
+        
+        Args:
+            data: input data (str/bytes/WordArray).
+            key: optional password for HMAC and cipher tests.
+            iv: optional IV for block cipher modes.
+        
+        Returns:
+            str: combined formatted output.
+        """
+        parts = [_util.digest_all(data)]
+        if key:
+            parts.append(_util._hmac_all(data, key))
+            parts.append(_util.encrypt_all(data, key, iv))
+            parts.append(_util.decrypt_all(data, key, iv))
+        output = "\n".join(parts)
+        return output
+
+    @staticmethod
+    def _hmac_all(data, key):
+        """Internal: run all HMAC algorithms, return formatted table."""
+        hmacs = [
+            ("HmacMD5",       HmacMD5),
+            ("HmacSHA1",      HmacSHA1),
+            ("HmacRIPEMD160", HmacRIPEMD160),
+            ("HmacSHA224",    HmacSHA224),
+            ("HmacSM3",       HmacSM3),
+            ("HmacSHA256",    HmacSHA256),
+            ("HmacSHA384",    HmacSHA384),
+            ("HmacSHA512",    HmacSHA512),
+            ("HmacSHA3",      HmacSHA3),
+        ]
+        sep = "-" * 72
+        lines = [sep, "HMAC Algorithm     | Bits | Tag (hex)", sep]
+        for name, fn in hmacs:
+            result = fn(data, key)
+            bits = len(result) * 8
+            hex_str = result.toString()
+            display = hex_str[:56] + "..." if len(hex_str) > 60 else hex_str
+            lines.append(f"  {name:<18} | {bits:>4} | {display}")
+        lines.append(sep)
+        output = "\n".join(lines)
+        print(output)
+        return output
 
 util = _util()
 

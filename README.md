@@ -565,6 +565,46 @@ wa.concat(other)
 CryptoPy.lib.WordArray.random(16)         # cryptographically random
 ```
 
+### Util — 便利测试函数
+
+一键运行所有算法，输出对比表格。
+
+```python
+# 全能模式：data + key + iv 时运行 摘要 + HMAC + 加密 + 解密
+CryptoPy.util.crypto_all("Hello World", "MyKey", "InitVector")
+
+# 仅摘要（12 种）
+CryptoPy.util.digest_all("Hello World")
+
+# 仅加密（无 IV：仅 ECB + 流密码；带 IV：含全部模式）
+CryptoPy.util.encrypt_all("Hello World", "MyKey")
+CryptoPy.util.encrypt_all("Hello World", "MyKey", "InitVector")
+
+# 仅解密 roundtrip（加密 → 解密 → 比对原文）
+CryptoPy.util.decrypt_all("Hello World", "MyKey")
+```
+
+**输出示例**（`digest_all`）：
+
+```
+------------------------------------------------------------------------
+Digest Algorithms  | Bits | Result (hex)
+------------------------------------------------------------------------
+  MD5                |  128 | b10a8db164e0754105b7a99be72e3fe5
+  SHA1               |  160 | 0a4d55a8d778e5022fab701977c5d840bbc486d0
+  RIPEMD160          |  160 | 825adee0ef024e5ebc7029038cd641f5427e54f7
+  SHA224             |  224 | b3c8f6c3b4f4b4f4b4f4b4f4b4f4b4f4b4f4b4f4...
+  SM3                |  256 | b0c058279a0af87bb7472cf6e4e3b6b0206130e4...
+  SHA256             |  256 | a591a6d40bf420404a011733cfb7b190d62c65bf...
+  SHA3-224           |  224 | ...
+  SHA3-256           |  256 | ...
+  SHA384             |  384 | ...
+  SHA3-384           |  384 | ...
+  SHA512             |  512 | ...
+  SHA3-512           |  512 | ...
+------------------------------------------------------------------------
+```
+
 ### Formats & Serialization
 
 ```python

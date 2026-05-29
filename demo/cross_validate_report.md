@@ -1,6 +1,6 @@
 # CryptoPy 算法交叉验证报告
 
-生成时间: 2026-05-30 00:42:51
+生成时间: 2026-05-30 01:11:28
 Python: 3.9.6 (default, Apr 17 2026, 18:15:52) 
 [Clang 21.0.0 (clang-2100.1.1.101)]
 
@@ -181,8 +181,8 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | SM2 sk hex→WA len | ✓ | `32` | `32` | - |
 | SM2 pk hex→WA len | ✓ | `64` | `64` | - |
 | SM2 hex key verify | ✓ | `True` | `True` | - |
-| SM2 sk bytes hex match | ✓ | `e461bbc79f1103fd4bf55d6fc071157bc19294b8` | `e461bbc79f1103fd4bf55d6fc071157bc19294b8` | - |
-| SM2 pk bytes hex match | ✓ | `21356c9a82aec2370e072d837ec4cc503db1aeab` | `21356c9a82aec2370e072d837ec4cc503db1aeab` | - |
+| SM2 sk bytes hex match | ✓ | `823a523e011b98c1d05d6b1cda4cd059f98b9460` | `823a523e011b98c1d05d6b1cda4cd059f98b9460` | - |
+| SM2 pk bytes hex match | ✓ | `3af90556153617cdd86a3898ba1e34084718596f` | `3af90556153617cdd86a3898ba1e34084718596f` | - |
 | SM9 mpk type | ✓ | `WordArray` | `WordArray` | - |
 | SM9 msk type | ✓ | `WordArray` | `WordArray` | - |
 | SM9 mpk len | ✓ | `128` | `128` | - |
@@ -203,8 +203,8 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | RSA sig type | ✓ | `WordArray` | `WordArray` | - |
 | RSA verify | ✓ | `True` | `True` | - |
 | RSA hex key roundtrip | ✓ | `b'hex key'` | `b'hex key'` | - |
-| RSA priv bytes hex match | ✓ | `0400809c2c7f52f0c3e78efb32da7afebcdd0988` | `0400809c2c7f52f0c3e78efb32da7afebcdd0988` | - |
-| RSA pub bytes hex match | ✓ | `0400809c2c7f52f0c3e78efb32da7afebcdd0988` | `0400809c2c7f52f0c3e78efb32da7afebcdd0988` | - |
+| RSA priv bytes hex match | ✓ | `04008d5f0a323910afc59282b62de6ac21d09622` | `04008d5f0a323910afc59282b62de6ac21d09622` | - |
+| RSA pub bytes hex match | ✓ | `04008d5f0a323910afc59282b62de6ac21d09622` | `04008d5f0a323910afc59282b62de6ac21d09622` | - |
 
 ## 互操作性总结
 
