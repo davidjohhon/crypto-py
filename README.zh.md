@@ -298,25 +298,6 @@ bytes(key)                                    # 密钥原始字节
 key = CryptoPy.EvpKDF("password", "salt")
 ```
 
-### Util — 便利测试函数
-
-一键运行所有算法，输出对比表格。
-
-```python
-# 全能模式：data + key + iv 时运行 摘要 + HMAC + 加密 + 解密
-CryptoPy.util.crypto_all("Hello World", "MyKey", "InitVector")
-
-# 仅摘要（12 种）
-CryptoPy.util.digest_all("Hello World")
-
-# 仅加密
-CryptoPy.util.encrypt_all("Hello World", "MyKey")
-CryptoPy.util.encrypt_all("Hello World", "MyKey", "InitVector")
-
-# 仅解密 roundtrip
-CryptoPy.util.decrypt_all("Hello World", "MyKey")
-```
-
 ### 填充方案
 
 ```python
