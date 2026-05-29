@@ -197,39 +197,46 @@ ZUC = StreamCipher._createHelper(_ZUC)
 
 
 class SM2:
-    """SM2 public key cryptography.
+    """SM2 public key cryptography (GM/T 0003-2012).
+    
+    Follows crypto-js convention: method(message, key, ...).
     
     Usage:
         sk, pk = CryptoPy.SM2.generate_keypair()
-        sig = CryptoPy.SM2.sign(sk, "message")
-        ok  = CryptoPy.SM2.verify(pk, "message", sig)
-        ct  = CryptoPy.SM2.encrypt(pk, "message")
-        pt  = CryptoPy.SM2.decrypt(sk, ct)
+        sig = CryptoPy.SM2.sign("message", sk)
+        ok  = CryptoPy.SM2.verify("message", sig, pk)
+        ct  = CryptoPy.SM2.encrypt("message", pk)
+        pt  = CryptoPy.SM2.decrypt(ct, sk)
     """
     generate_keypair = staticmethod(_sm2_genkey)
-    sign = staticmethod(_sm2_sign)
-    verify = staticmethod(_sm2_verify)
-    encrypt = staticmethod(_sm2_encrypt)
-    decrypt = staticmethod(_sm2_decrypt)
+    sign = staticmethod(lambda msg, key, ida=None: _sm2_sign(msg, key, ida=ida))
+    verify = staticmethod(lambda msg, sig, key, ida=None: _sm2_verify(msg, sig, key, ida=ida))
+    encrypt = staticmethod(lambda msg, key: _sm2_encrypt(msg, key))
+    decrypt = staticmethod(lambda ct, key: _sm2_decrypt(ct, key))
 
 
 class SM9:
-    """SM9 identity-based cryptography.
+    """SM9 identity-based cryptography (GM/T 0044-2016).
+    
+    Follows crypto-js convention: method(message, key, ...).
     
     Usage:
         mpk, msk = CryptoPy.SM9.setup()
-        usk = CryptoPy.SM9.generate_user_key(msk, "alice")
-        sig = CryptoPy.SM9.sign(usk, "message")
-        ok  = CryptoPy.SM9.verify(mpk, "alice", "message", sig)
+        usk = CryptoPy.SM9.generate_user_key(msk, b"alice")
+        sig = CryptoPy.SM9.sign(b"message", usk)
+        ok  = CryptoPy.SM9.verify(b"message", sig, mpk, b"alice")
     """
     setup = staticmethod(_sm9_setup)
     generate_user_key = staticmethod(_sm9_genkey)
-    sign = staticmethod(_sm9_sign)
-    verify = staticmethod(_sm9_verify)
+    sign = staticmethod(lambda msg, key: _sm9_sign(msg, key))
+    verify = staticmethod(lambda msg, sig, mpk, id, hid=0x01: _sm9_verify(msg, sig, mpk, id, hid=hid))
 
 
 class RSA:
     """RSA public key cryptography (PKCS#1 v1.5).
+
+    Follows crypto-js convention: method(message, key, ...).
+    verify() returns True on success (not hash name).
 
     Usage:
         priv, pub = CryptoPy.RSA.generate_keypair(2048)

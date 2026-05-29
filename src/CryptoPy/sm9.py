@@ -45,6 +45,32 @@ def _int_from(b):
     return int.from_bytes(b, 'big')
 
 
+def _to_wa(data):
+    """Convert bytes to WordArray."""
+    words = []
+    for i in range(0, len(data), 4):
+        chunk = data[i:i + 4]
+        if len(chunk) < 4:
+            chunk += b'\x00' * (4 - len(chunk))
+        words.append(int.from_bytes(chunk, 'big'))
+    return WordArray.create(words, len(data))
+
+
+def _wa_key(data):
+    """Accept WordArray or bytes/str, return bytes."""
+    if isinstance(data, WordArray):
+        result = bytearray()
+        for i in range(data.sigBytes):
+            word_idx = i // 4
+            byte_idx = 3 - (i % 4)
+            if word_idx < len(data.words):
+                result.append((data.words[word_idx] >> (byte_idx * 8)) & 0xff)
+        return bytes(result)
+    if isinstance(data, str):
+        return bytes.fromhex(data)
+    return data
+
+
 # ═══════════════════════════════════════════════════════════════
 # Extension field tower: Fp² → Fp⁴ → Fp¹²
 # ═══════════════════════════════════════════════════════════════
@@ -859,14 +885,15 @@ def setup():
     mpk = [msk]·P₂  (on G₂)
 
     Returns:
-        (mpk_bytes, msk_bytes) where mpk is 128 bytes (affine G₂)
-        and msk is 32 bytes (scalar).
+        (mpk_wa, msk_wa) as WordArrays.
+        mpk is 128 bytes (affine G₂), msk is 32 bytes (scalar).
+        Use .toString() for hex.
     """
     msk = _int_from(os.urandom(32)) % (SM9_N - 1) + 1
     mpk = _ec2_to_affine(_ec2_mul(msk, _G2))
     mpk_bytes = (_int_to(mpk.x.a0) + _int_to(mpk.x.a1) +
                  _int_to(mpk.y.a0) + _int_to(mpk.y.a1))
-    return (mpk_bytes, _int_to(msk))
+    return (_to_wa(mpk_bytes), _to_wa(_int_to(msk)))
 
 
 def generate_user_key(master_secret_key, identity, hid=0x01):
@@ -876,9 +903,10 @@ def generate_user_key(master_secret_key, identity, hid=0x01):
     t₂ = msk · (msk + t₁)⁻¹  mod N
     usk = [t₂]·P₁  (on G₁)
 
-    Returns 192-byte user_key: usk.x || usk.y || mpk.x.a0 || mpk.x.a1 || mpk.y.a0 || mpk.y.a1.
+    Returns WordArray (192 bytes):
+        usk.x || usk.y || mpk.x.a0 || mpk.x.a1 || mpk.y.a0 || mpk.y.a1.
     """
-    msk = _int_from(master_secret_key)
+    msk = _int_from(_wa_key(master_secret_key))
     t1 = _hash1(identity, hid)
     if (msk + t1) % SM9_N == 0:
         raise ValueError("Master key + H1(ID) == 0 mod N, regenerate master key")
@@ -887,13 +915,16 @@ def generate_user_key(master_secret_key, identity, hid=0x01):
     mpk = _ec2_to_affine(_ec2_mul(msk, _G2))
     mpk_bytes = (_int_to(mpk.x.a0) + _int_to(mpk.x.a1) +
                  _int_to(mpk.y.a0) + _int_to(mpk.y.a1))
-    return _int_to(usk.x) + _int_to(usk.y) + mpk_bytes
+    return _to_wa(_int_to(usk.x) + _int_to(usk.y) + mpk_bytes)
 
 
-def sign(user_key, message):
+def sign(message, user_key):
     """SM9 digital signature generation.
 
-    user_key = usk || mpk (192 bytes from generate_user_key)
+    Returns WordArray (96 bytes: h || S.x || S.y).
+    Use .toString() for hex.
+
+    user_key: WordArray or bytes (192 bytes: usk || mpk from generate_user_key).
 
     g = e(P₁, mpk)
     r ← random ∈ [1, N-1]
@@ -906,6 +937,7 @@ def sign(user_key, message):
     """
     if isinstance(message, str):
         message = message.encode()
+    user_key = _wa_key(user_key)
 
     usk = _Point(_int_from(user_key[:32]),
                   _int_from(user_key[32:64]))
@@ -925,13 +957,14 @@ def sign(user_key, message):
 
     l = (r - h) % SM9_N
     S = _ec_mul(l, usk)
-    return _int_to(h) + _int_to(S.x) + _int_to(S.y)
+    return _to_wa(_int_to(h) + _int_to(S.x) + _int_to(S.y))
 
 
-def verify(master_public_key, identity, message, signature, hid=0x01):
+def verify(message, signature, master_public_key, identity, hid=0x01):
     """SM9 signature verification.
 
-    Master public key: 128 bytes (affine G₂ from setup).
+    signature: WordArray or bytes (96 bytes: h || S.x || S.y).
+    Master public key: WordArray or bytes (128 bytes, affine G₂ from setup).
 
     h₁ = H1(IDA || hid)
     g  = e(P₁, mpk)
@@ -945,11 +978,14 @@ def verify(master_public_key, identity, message, signature, hid=0x01):
     if isinstance(message, str):
         message = message.encode()
 
+    signature = _wa_key(signature)
+    mpk_bytes = _wa_key(master_public_key)
+
     mpk = _Point2(
-        Fp2(_int_from(master_public_key[0:32]),
-            _int_from(master_public_key[32:64])),
-        Fp2(_int_from(master_public_key[64:96]),
-            _int_from(master_public_key[96:128])))
+        Fp2(_int_from(mpk_bytes[0:32]),
+            _int_from(mpk_bytes[32:64])),
+        Fp2(_int_from(mpk_bytes[64:96]),
+            _int_from(mpk_bytes[96:128])))
 
     h = _int_from(signature[:32])
     sx, sy = _int_from(signature[32:64]), _int_from(signature[64:96])

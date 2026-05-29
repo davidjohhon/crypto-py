@@ -535,17 +535,17 @@ def test_sm2():
     print("SM2:")
     ok = True
     sk, pk = CryptoPy.SM2.generate_keypair()
-    # Sign/verify
-    sig = CryptoPy.SM2.sign(sk, "SM2 message")
-    ok &= assert_eq("sign/verify", CryptoPy.SM2.verify(pk, "SM2 message", sig), True)
-    ok &= assert_eq("tampered verify", CryptoPy.SM2.verify(pk, "wrong message", sig), False)
+    # Sign/verify — follows crypto-js convention: method(message, key, ...)
+    sig = CryptoPy.SM2.sign("SM2 message", sk)
+    ok &= assert_eq("sign/verify", CryptoPy.SM2.verify("SM2 message", sig, pk), True)
+    ok &= assert_eq("tampered verify", CryptoPy.SM2.verify("wrong message", sig, pk), False)
     # Encrypt/decrypt
-    ct = CryptoPy.SM2.encrypt(pk, "SM2 secret")
-    pt = CryptoPy.SM2.decrypt(sk, ct)
+    ct = CryptoPy.SM2.encrypt("SM2 secret", pk)
+    pt = CryptoPy.SM2.decrypt(ct, sk)
     ok &= assert_eq("enc/dec", pt, b"SM2 secret")
     # Bytes message
-    sig2 = CryptoPy.SM2.sign(sk, b"bytes msg")
-    ok &= assert_eq("bytes sign/verify", CryptoPy.SM2.verify(pk, b"bytes msg", sig2), True)
+    sig2 = CryptoPy.SM2.sign(b"bytes msg", sk)
+    ok &= assert_eq("bytes sign/verify", CryptoPy.SM2.verify(b"bytes msg", sig2, pk), True)
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
@@ -554,16 +554,16 @@ def test_sm9():
     ok = True
     mpk, msk = CryptoPy.SM9.setup()
     usk = CryptoPy.SM9.generate_user_key(msk, "alice")
-    sig = CryptoPy.SM9.sign(usk, "SM9 message")
+    sig = CryptoPy.SM9.sign("SM9 message", usk)
     ok &= assert_eq("sign length", len(sig), 96)
     ok &= sig != b'\x00' * 96
-    ok &= assert_eq("verify", CryptoPy.SM9.verify(mpk, "alice", "SM9 message", sig), True)
-    ok &= assert_eq("verify wrong msg", CryptoPy.SM9.verify(mpk, "alice", "wrong msg", sig), False)
-    ok &= assert_eq("verify wrong id", CryptoPy.SM9.verify(mpk, "bob", "SM9 message", sig), False)
+    ok &= assert_eq("verify", CryptoPy.SM9.verify("SM9 message", sig, mpk, "alice"), True)
+    ok &= assert_eq("verify wrong msg", CryptoPy.SM9.verify("wrong msg", sig, mpk, "alice"), False)
+    ok &= assert_eq("verify wrong id", CryptoPy.SM9.verify("SM9 message", sig, mpk, "bob"), False)
     usk2 = CryptoPy.SM9.generate_user_key(msk, b"bob")
-    sig2 = CryptoPy.SM9.sign(usk2, b"bytes msg")
+    sig2 = CryptoPy.SM9.sign(b"bytes msg", usk2)
     ok &= assert_eq("bytes sign", len(sig2), 96)
-    ok &= assert_eq("bytes verify", CryptoPy.SM9.verify(mpk, b"bob", b"bytes msg", sig2), True)
+    ok &= assert_eq("bytes verify", CryptoPy.SM9.verify(b"bytes msg", sig2, mpk, b"bob"), True)
     print(f"  {'PASS' if ok else 'FAIL'}")
 
 
@@ -575,16 +575,187 @@ def test_rsa():
     pt = CryptoPy.RSA.decrypt(ct, priv)
     ok &= assert_eq("enc/dec", pt, b"Hello RSA")
     sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
-    ok &= assert_eq("sign/verify", CryptoPy.RSA.verify("message", sig, pub), "SHA-256")
+    ok &= assert_eq("sign/verify", CryptoPy.RSA.verify("message", sig, pub), True)
     try:
         CryptoPy.RSA.verify("wrong", sig, pub)
         ok = False
     except ValueError:
         ok &= True
     sig2 = CryptoPy.RSA.sign(b"bytes msg", priv, CryptoPy.hash.SHA256)
-    ok &= assert_eq("bytes verify", CryptoPy.RSA.verify(b"bytes msg", sig2, pub), "SHA-256")
+    ok &= assert_eq("bytes verify", CryptoPy.RSA.verify(b"bytes msg", sig2, pub), True)
     print(f"  {'PASS' if ok else 'FAIL'}")
 
+
+def test_type_conversions():
+    """Verify all return types match crypto-js WordArray conventions."""
+    print("Type Conversions:")
+    ok = True
+
+    # ── 1. WordArray basics ──
+    wa = CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef], 5)
+    ok &= assert_eq("WA sigBytes", wa.sigBytes, 5)
+    ok &= assert_eq("WA __len__", len(wa), 5)
+    ok &= assert_eq("WA __bytes__", bytes(wa).hex(), "1234567890")
+    ok &= assert_eq("WA __eq__(bytes)", wa == b'\x12\x34\x56\x78\x90', True)
+    ok &= assert_eq("WA __eq__(str)", wa == "1234567890", True)
+    ok &= assert_eq("WA __eq__(WA)", wa == CryptoPy.lib.WordArray.create([0x12345678, 0x90abcdef], 5), True)
+
+    # ── 2. Hash returns WordArray ──
+    h = CryptoPy.MD5('abc')
+    ok &= assert_eq("Hash type", type(h).__name__, "WordArray")
+    ok &= assert_eq("Hash __len__", len(h), 16)  # MD5 = 16 bytes
+    ok &= assert_eq("Hash toString()", h.toString(), '900150983cd24fb0d6963f7d28e17f72')
+    ok &= assert_eq("Hash toString(Hex)", h.toString(CryptoPy.enc.Hex), '900150983cd24fb0d6963f7d28e17f72')
+    ok &= assert_eq("Hash toString(Base64)", h.toString(CryptoPy.enc.Base64), 'kAFQmDzST7DWlj99KOF/cg==')
+    ok &= assert_eq("Hash bytes()", bytes(h).hex(), '900150983cd24fb0d6963f7d28e17f72')
+    ok &= assert_eq("Hash __eq__(bytes)", h == bytes.fromhex('900150983cd24fb0d6963f7d28e17f72'), True)
+    ok &= assert_eq("Hash __eq__(str)", h == '900150983cd24fb0d6963f7d28e17f72', True)
+    ok &= assert_eq("str(Hash) == toString()", str(h), h.toString())
+
+    # ── 3. SHA256 WordArray ──
+    h256 = CryptoPy.SHA256('abc')
+    ok &= assert_eq("SHA256 __len__", len(h256), 32)  # 256 bits = 32 bytes
+    ok &= assert_eq("SHA256 toString()", h256.toString(), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
+    ok &= assert_eq("SHA256 bytes()", bytes(h256).hex()[:16], 'ba7816bf8f01cfea')
+
+    # ── 4. SM3 WordArray ──
+    h3 = CryptoPy.SM3('abc')
+    ok &= assert_eq("SM3 __len__", len(h3), 32)
+    ok &= assert_eq("SM3 toString()", h3.toString(), '66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0')
+
+    # ── 5. HMAC returns WordArray ──
+    hm = CryptoPy.HmacSHA256('msg', 'key')
+    ok &= assert_eq("HMAC type", type(hm).__name__, "WordArray")
+    ok &= assert_eq("HMAC __len__", len(hm), 32)
+    # HMAC with string key uses Utf8 encoding internally
+    ok &= assert_eq("HMAC toString len", len(hm.toString()), 64)  # 32 bytes = 64 hex
+
+    # ── 6. AES encrypt returns CipherParams ──
+    key = CryptoPy.enc.Hex.parse('000102030405060708090a0b0c0d0e0f')
+    ct = CryptoPy.AES.encrypt("data", "password")
+    ok &= assert_eq("encrypt type", type(ct).__name__, "CipherParams")
+    ok &= assert_eq("ciphertext type", type(ct.ciphertext).__name__, "WordArray")
+    ok &= assert_eq("ciphertext len", len(ct.ciphertext) > 0, True)
+    ok &= assert_eq("CipherParams.toString()", str(ct), ct.toString())
+    ok &= ct.toString().startswith('U2FsdGVkX1')  # Salted__ prefix
+    ok &= assert_eq("CipherParams.ciphertext.hex", ct.ciphertext.toString(), ct.toString(CryptoPy.enc.Hex))
+
+    # ── 7. AES decrypt returns WordArray ──
+    dec = CryptoPy.AES.decrypt(ct, "password")
+    ok &= assert_eq("decrypt type", type(dec).__name__, "WordArray")
+    ok &= assert_eq("decrypt .toString(Utf8)", dec.toString(CryptoPy.enc.Utf8), 'data')
+    ok &= assert_eq("decrypt str() == toString()", str(dec), dec.toString())
+    ok &= assert_eq("decrypt bytes()", bytes(dec).decode(), 'data')
+
+    # ── 8. AES with WordArray key ──
+    iv = CryptoPy.enc.Hex.parse('101112131415161718191a1b1c1d1e1f')
+    ct2 = CryptoPy.AES.encrypt('msg', key, {'iv': iv, 'mode': CryptoPy.mode.CBC})
+    dec2 = CryptoPy.AES.decrypt(ct2, key, {'iv': iv, 'mode': CryptoPy.mode.CBC})
+    ok &= assert_eq("AES WA key roundtrip", dec2.toString(CryptoPy.enc.Utf8), 'msg')
+
+    # ── 9. AES key format: hex str → WordArray → hex str ──
+    key_hex = '000102030405060708090a0b0c0d0e0f'
+    key_wa = CryptoPy.enc.Hex.parse(key_hex)
+    ok &= assert_eq("key→WA→hex", key_wa.toString(), key_hex)
+    key_bytes = bytes(key_wa)
+    ok &= assert_eq("key→WA→bytes", key_bytes.hex(), key_hex)
+    key_words = [int.from_bytes(key_bytes[i:i+4], 'big') for i in range(0, len(key_bytes), 4)]
+    key_wa2 = CryptoPy.lib.WordArray.create(key_words, len(key_bytes))
+    ok &= assert_eq("key bytes→WA→hex", key_wa2.toString(), key_hex)
+
+    # ── 10. SM2 keys are WordArrays ──
+    sk, pk = CryptoPy.SM2.generate_keypair()
+    ok &= assert_eq("SM2 sk type", type(sk).__name__, "WordArray")
+    ok &= assert_eq("SM2 pk type", type(pk).__name__, "WordArray")
+    ok &= assert_eq("SM2 sk len", len(sk), 32)
+    ok &= assert_eq("SM2 pk len", len(pk), 64)
+    ok &= assert_eq("SM2 sk toString 64", len(sk.toString()), 64)  # 32 bytes = 64 hex
+    ok &= assert_eq("SM2 pk toString 128", len(pk.toString()), 128)  # 64 bytes = 128 hex
+    # Sign/verify with WordArray keys
+    sig = CryptoPy.SM2.sign("test", sk)
+    ok &= assert_eq("SM2 sig type", type(sig).__name__, "WordArray")
+    ok &= assert_eq("SM2 sig len", len(sig), 64)
+    ok &= assert_eq("SM2 sig toString", len(sig.toString()), 128)
+    ok &= assert_eq("SM2 verify", CryptoPy.SM2.verify("test", sig, pk), True)
+    # Encrypt/decrypt with WordArray
+    ct3 = CryptoPy.SM2.encrypt("secret", pk)
+    ok &= assert_eq("SM2 ct type", type(ct3).__name__, "WordArray")
+    pt3 = CryptoPy.SM2.decrypt(ct3, sk)
+    ok &= assert_eq("SM2 decrypted text", pt3, b"secret")
+    # Key roundtrip: WordArray → bytes → hex → WordArray
+    sk_bytes, pk_bytes = bytes(sk), bytes(pk)
+    sk_hex, pk_hex = sk.toString(), pk.toString()
+    ok &= assert_eq("SM2 sk bytes → hex match", sk_hex, sk_bytes.hex().lower())
+    ok &= assert_eq("SM2 pk bytes → hex match", pk_hex, pk_bytes.hex().lower())
+    # Re-create from hex string
+    sk_from_hex = CryptoPy.enc.Hex.parse(sk_hex)
+    pk_from_hex = CryptoPy.enc.Hex.parse(pk_hex)
+    ok &= assert_eq("SM2 sk hex → WA → sk len", len(sk_from_hex), len(sk))
+    ok &= assert_eq("SM2 pk hex → WA → pk len", len(pk_from_hex), len(pk))
+    ok &= assert_eq("SM2 hex key sign/verify",
+                    CryptoPy.SM2.verify("test2", CryptoPy.SM2.sign("test2", sk_from_hex), pk_from_hex), True)
+
+    # ── 11. SM9 keys are WordArrays ──
+    try:
+        mpk, msk = CryptoPy.SM9.setup()
+        ok &= assert_eq("SM9 mpk type", type(mpk).__name__, "WordArray")
+        ok &= assert_eq("SM9 msk type", type(msk).__name__, "WordArray")
+        ok &= assert_eq("SM9 mpk len", len(mpk), 128)
+        ok &= assert_eq("SM9 msk len", len(msk), 32)
+        usk = CryptoPy.SM9.generate_user_key(msk, b"alice")
+        ok &= assert_eq("SM9 usk type", type(usk).__name__, "WordArray")
+        ok &= assert_eq("SM9 usk len", len(usk), 192)
+        sig9 = CryptoPy.SM9.sign(b"msg", usk)
+        ok &= assert_eq("SM9 sig type", type(sig9).__name__, "WordArray")
+        ok &= assert_eq("SM9 sig len", len(sig9), 96)
+        ok &= assert_eq("SM9 verify", CryptoPy.SM9.verify(b"msg", sig9, mpk, b"alice"), True)
+        mpk_hex = mpk.toString()
+        msk_hex = msk.toString()
+        usk_hex = usk.toString()
+        mpk2 = CryptoPy.enc.Hex.parse(mpk_hex)
+        msk2 = CryptoPy.enc.Hex.parse(msk_hex)
+        usk2 = CryptoPy.enc.Hex.parse(usk_hex)
+        ok &= assert_eq("SM9 mpk hex roundtrip len", len(mpk2), 128)
+        ok &= assert_eq("SM9 msk hex roundtrip len", len(msk2), 32)
+        ok &= assert_eq("SM9 usk hex roundtrip len", len(usk2), 192)
+        sig9b = CryptoPy.SM9.sign(b"msg2", usk2)
+        ok &= assert_eq("SM9 verify with hex keys", CryptoPy.SM9.verify(b"msg2", sig9b, mpk2, b"alice"), True)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        ok = False
+
+    # ── 12. RSA keys are WordArrays ──
+    try:
+        priv, pub = CryptoPy.RSA.generate_keypair(1024)
+        ok &= assert_eq("RSA priv type", type(priv).__name__, "WordArray")
+        ok &= assert_eq("RSA pub type", type(pub).__name__, "WordArray")
+        ok &= assert_eq("RSA priv len > 0", len(priv) > 0, True)
+        ok &= assert_eq("RSA pub len > 0", len(pub) > 0, True)
+        ct4 = CryptoPy.RSA.encrypt(b"test RSA", pub)
+        ok &= assert_eq("RSA ct type", type(ct4).__name__, "WordArray")
+        pt4 = CryptoPy.RSA.decrypt(ct4, priv)
+        ok &= assert_eq("RSA decrypt", pt4, b"test RSA")
+        sigR = CryptoPy.RSA.sign(b"sign test", priv, CryptoPy.hash.SHA256)
+        ok &= assert_eq("RSA sig type", type(sigR).__name__, "WordArray")
+        ok &= assert_eq("RSA verify", CryptoPy.RSA.verify(b"sign test", sigR, pub), True)
+        # Key roundtrip via hex (WordArray → hex str → WordArray)
+        priv_hex = priv.toString(); pub_hex = pub.toString()
+        priv_hex_wa = CryptoPy.enc.Hex.parse(priv_hex)
+        pub_hex_wa = CryptoPy.enc.Hex.parse(pub_hex)
+        ok &= assert_eq("RSA priv hex roundtrip len", len(priv_hex_wa), len(priv))
+        ok &= assert_eq("RSA pub hex roundtrip len", len(pub_hex_wa), len(pub))
+        ct5 = CryptoPy.RSA.encrypt(b"hex key", pub_hex_wa)
+        pt5 = CryptoPy.RSA.decrypt(ct5, priv_hex_wa)
+        ok &= assert_eq("RSA hex key roundtrip", pt5, b"hex key")
+        # Key roundtrip via bytes
+        priv_bytes, pub_bytes = bytes(priv), bytes(pub)
+        ok &= assert_eq("RSA priv bytes match hex", priv_bytes.hex(), priv_hex)
+        ok &= assert_eq("RSA pub bytes match hex", pub_bytes.hex(), pub_hex)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        ok &= False
+
+    print(f"  {'PASS' if ok else 'FAIL'}")
 
 if __name__ == '__main__':
     tests = [
@@ -598,6 +769,7 @@ if __name__ == '__main__':
         test_wordarray, test_cipher_modes, test_padding,
         test_progressive, test_openssl_format, test_to_string,
         test_sm3, test_sm4, test_zuc, test_sm2, test_sm9, test_rsa,
+        test_type_conversions,
     ]
     passed = failed = 0
     for t in tests:

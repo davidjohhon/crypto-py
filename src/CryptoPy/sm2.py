@@ -86,6 +86,25 @@ def _to_wa(data):
         words.append(int.from_bytes(chunk, 'big'))
     return WordArray.create(words, len(data))
 
+def _wa_to_bytes(wa):
+    """Convert WordArray to bytes."""
+    result = bytearray()
+    for i in range(wa.sigBytes):
+        word_idx = i // 4
+        byte_idx = 3 - (i % 4)
+        if word_idx < len(wa.words):
+            result.append((wa.words[word_idx] >> (byte_idx * 8)) & 0xff)
+    return bytes(result)
+
+
+def _to_key(data):
+    """Accept WordArray or bytes, return bytes."""
+    if isinstance(data, WordArray):
+        return _wa_to_bytes(data)
+    if isinstance(data, str):
+        return bytes.fromhex(data)
+    return data
+
 
 def _hash(data):
     """SM3 hash of bytes -> int."""
@@ -130,41 +149,56 @@ def _kdf(z, klen):
 
 
 def generate_keypair():
-    """Generate SM2 key pair. Returns (private_key_bytes, public_key_bytes)."""
+    """Generate SM2 key pair.
+    
+    Returns (private_key_wa, public_key_wa) as WordArrays.
+    Use .toString() for hex.
+    """
     d = _int_from(os.urandom(32)) % (SM2_N - 1) + 1
     Q = _mul(d, _G)
-    return _int_to(d), _int_to(Q.x) + _int_to(Q.y)
+    return _to_wa(_int_to(d)), _to_wa(_int_to(Q.x) + _int_to(Q.y))
 
 
-def sign(private_key, message, ida=None):
-    """Sign a message with SM2 private key. Returns 64-byte signature.
+def sign(message, private_key, ida=None):
+    """SM2 digital signature (GM/T 0003-2012 §6.1).
     
-    ida: optional user identity bytes (default: b'1234567812345678').
+    Returns WordArray (64 bytes: r || s).
+    Use .toString() for hex, .toString(enc.Base64) for base64.
     """
     if isinstance(message, str):
         message = message.encode()
+    private_key = _to_key(private_key)
     d = _int_from(private_key)
-    Q = _mul(d, _G)
-    e = _hash_msg(message, Q.x, Q.y, ida)
+    
+    # Compute ZA
+    pk = _mul(d, _Point(SM2_GX, SM2_GY))
+    za = _za(ida or _DEFAULT_ID, pk.x, pk.y)
+    
+    e = _hash_msg(message, pk.x, pk.y, ida or _DEFAULT_ID)
+    
     while True:
         k = _int_from(os.urandom(32)) % (SM2_N - 1) + 1
-        p = _mul(k, _G)
+        p = _mul(k, _Point(SM2_GX, SM2_GY))
         r = (e + p.x) % SM2_N
         if r == 0 or r + k == SM2_N:
             continue
         s = _mod_inv(1 + d, SM2_N) * (k - r * d) % SM2_N
-        if s == 0:
-            continue
-        return _int_to(r) + _int_to(s)
+        if s != 0:
+            break
+    return _to_wa(_int_to(r) + _int_to(s))
 
 
-def verify(public_key, message, signature, ida=None):
+def verify(message, signature, public_key, ida=None):
     """Verify an SM2 signature. Returns True/False.
     
+    signature: WordArray or bytes (64-byte r || s).
+    public_key: WordArray or bytes (64 bytes: Q.x || Q.y).
     ida: optional user identity bytes (default: b'1234567812345678').
     """
     if isinstance(message, str):
         message = message.encode()
+    signature = _to_key(signature)
+    public_key = _to_key(public_key)
     r, s = _int_from(signature[:32]), _int_from(signature[32:])
     if not (1 <= r < SM2_N and 1 <= s < SM2_N):
         return False
@@ -179,10 +213,14 @@ def verify(public_key, message, signature, ida=None):
     return (e + p.x) % SM2_N == r
 
 
-def encrypt(public_key, message):
-    """Encrypt a message with SM2 public key."""
+def encrypt(message, public_key):
+    """Encrypt a message with SM2 public key.
+    
+    Returns WordArray (ciphertext).
+    """
     if isinstance(message, str):
         message = message.encode()
+    public_key = _to_key(public_key)
     P = _Point(_int_from(public_key[:32]), _int_from(public_key[32:]))
     while True:
         k = _int_from(os.urandom(32)) % (SM2_N - 1) + 1
@@ -195,11 +233,17 @@ def encrypt(public_key, message):
     c2 = bytes(a ^ b for a, b in zip(message, t))
     c3 = _int_to(_hash(x2 + message + y2), 32)
     # gmssl-compatible: C1 || C2 || C3 ordering (gm.decrypt reads C1||C2||C3)
-    return _int_to(c1.x) + _int_to(c1.y) + c2 + c3
+    return _to_wa(_int_to(c1.x) + _int_to(c1.y) + c2 + c3)
 
 
-def decrypt(private_key, ciphertext):
-    """Decrypt a ciphertext with SM2 private key."""
+def decrypt(ciphertext, private_key):
+    """Decrypt a ciphertext with SM2 private key.
+    
+    ciphertext: WordArray or bytes.
+    Returns bytes (decrypted message).
+    """
+    ciphertext = _to_key(ciphertext)
+    private_key = _to_key(private_key)
     d = _int_from(private_key)
     cx = _int_from(ciphertext[:32])
     cy = _int_from(ciphertext[32:64])

@@ -56,6 +56,21 @@ def _int_from(b):
     return int.from_bytes(b, 'big')
 
 
+def _wa_key(data):
+    """Accept WordArray, bytes, or str(hex); return bytes."""
+    if isinstance(data, WordArray):
+        result = bytearray()
+        for i in range(data.sigBytes):
+            word_idx = i // 4
+            byte_idx = 3 - (i % 4)
+            if word_idx < len(data.words):
+                result.append((data.words[word_idx] >> (byte_idx * 8)) & 0xff)
+        return bytes(result)
+    if isinstance(data, str):
+        return bytes.fromhex(data)
+    return data
+
+
 def _int_to(x, n=None):
     if n is None:
         n = (x.bit_length() + 7) // 8
@@ -138,7 +153,8 @@ def _get_prime(nbits):
 def generate_keypair(nbits=2048):
     """Generate an RSA key pair.
 
-    Returns (private_key_bytes, public_key_bytes).
+    Returns (private_key_wa, public_key_wa) as WordArrays.
+    Use .toString() for hex.
     """
     if nbits < 512:
         raise ValueError("Key size must be at least 512 bits")
@@ -175,7 +191,7 @@ def generate_keypair(nbits=2048):
     priv = (struct.pack('>H', nbits) + _int_to(n, key_bytes) + _int_to(e, key_bytes) +
             _int_to(d, key_bytes) + _int_to(p, half) + _int_to(q, half) +
             _int_to(exp1, half) + _int_to(exp2, half) + _int_to(coef, half))
-    return priv, pub
+    return _to_wa(priv), _to_wa(pub)
 
 
 def _key_from(pub_bytes):
@@ -243,22 +259,30 @@ def _decrypt_int_fast(c, p, q, exp1, exp2, coef):
 # ─── Public API ───────────────────────────────────────────
 
 def encrypt(message, public_key):
-    """RSA PKCS#1 v1.5 encryption."""
+    """RSA PKCS#1 v1.5 encryption.
+    
+    message: str, bytes, or WordArray.
+    Returns WordArray (ciphertext).
+    """
     if isinstance(message, str):
         message = message.encode()
-    n, e = _key_from(public_key)
+    elif isinstance(message, WordArray):
+        message = _wa_key(message)
+    n, e = _key_from(_wa_key(public_key))
     keylength = _byte_size(n)
     padded = _pad_encrypt(message, keylength)
     m = _int_from(padded)
     c = _encrypt_int(m, e, n)
-    return _int_to(c, keylength)
+    return _to_wa(_int_to(c, keylength))
 
 
 def decrypt(ciphertext, private_key):
-    """RSA PKCS#1 v1.5 decryption with CRT."""
-    if isinstance(ciphertext, str):
-        ciphertext = ciphertext.encode()
-    n, e, d, p, q, exp1, exp2, coef = _privkey_from(private_key)
+    """RSA PKCS#1 v1.5 decryption with CRT.
+    
+    Returns bytes (decrypted message).
+    """
+    ciphertext = _wa_key(ciphertext)
+    n, e, d, p, q, exp1, exp2, coef = _privkey_from(_wa_key(private_key))
     keylength = _byte_size(n)
     if len(ciphertext) > keylength:
         raise ValueError("Ciphertext too long")
@@ -283,11 +307,12 @@ def _compute_hash(message, method_name):
 def sign(message, private_key, hash_method="SHA-256"):
     """RSA PKCS#1 v1.5 detached signature.
     
+    Returns WordArray (signature).
     hash_method: CryptoPy.hash.SHA256, "SHA-256", "SHA-1", "MD5", etc.
     """
     if isinstance(message, str):
         message = message.encode()
-    n, e, d, p, q, exp1, exp2, coef = _privkey_from(private_key)
+    n, e, d, p, q, exp1, exp2, coef = _privkey_from(_wa_key(private_key))
     keylength = _byte_size(n)
     msg_hash = _compute_hash(message, hash_method)
     asn1code = _HASH_ASN1[hash_method]
@@ -295,17 +320,18 @@ def sign(message, private_key, hash_method="SHA-256"):
     padded = _pad_sign(digest_info, keylength)
     m = _int_from(padded)
     s = _decrypt_int_fast(m, p, q, exp1, exp2, coef)
-    return _int_to(s, keylength)
+    return _to_wa(_int_to(s, keylength))
 
 
 def verify(message, signature, public_key):
     """RSA PKCS#1 v1.5 signature verification.
     
-    Returns the hash method name if valid, raises ValueError otherwise.
+    Returns True if valid, raises ValueError otherwise.
     """
     if isinstance(message, str):
         message = message.encode()
-    n, e = _key_from(public_key)
+    signature = _wa_key(signature)
+    n, e = _key_from(_wa_key(public_key))
     keylength = _byte_size(n)
     if len(signature) != keylength:
         raise ValueError("Verification failed: wrong signature length")
@@ -323,4 +349,4 @@ def verify(message, signature, public_key):
     expected = _pad_sign(_HASH_ASN1[method_name] + msg_hash, keylength)
     if expected != clearsig:
         raise ValueError("Verification failed: signature mismatch")
-    return method_name
+    return True

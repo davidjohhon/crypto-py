@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="crypto4py",
-    version="2.0.5",
+    version="2.0.6",
     description="CryptoPy - standard and secure cryptographic algorithms, Python port of CryptoJS",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

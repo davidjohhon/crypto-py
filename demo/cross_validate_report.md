@@ -1,6 +1,6 @@
 # CryptoPy 算法交叉验证报告
 
-生成时间: 2026-05-28 21:59:34
+生成时间: 2026-05-30 00:23:59
 Python: 3.9.6 (default, Apr 17 2026, 18:15:52) 
 [Clang 21.0.0 (clang-2100.1.1.101)]
 
@@ -17,12 +17,12 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 
 ## 总览
 
-- **总计测试项**: 110
-- **通过**: 109 (99.1%)
-- **失败**: 1 (0.9%)
-- **发现差异**: 1 项
+- **总计测试项**: 179
+- **通过**: 179 (100.0%)
+- **失败**: 0 (0.0%)
+- **发现差异**: 0 项
 
-### 哈希算法 (109/110)
+### 哈希算法 (179/179)
 
 | 测试项 | 状态 | 预期/参考 | CryptoPy | 说明 |
 |---|---|---|---|---|
@@ -91,15 +91,19 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | SM4 password roundtrip | ✓ | `Hello SM4` | `Hello SM4` | - |
 | ZUC encrypt/decrypt roundtrip | ✓ | `00000000000000000000000000000000` | `00000000000000000000000000000000` | - |
 | ZUC password roundtrip | ✓ | `Hello ZUC` | `Hello ZUC` | - |
-| gmalg ZUC matches GM/T 0001 standard (0x27bede74) | ✓ | `0x27bede74` | `0x27bede74` | - |
-| CryptoPy ZUC vs GM/T 0001 standard (known issue) | ✗ | `0x27bede74` | `0xe8db9c8e` | CryptoPy ZUC keystream differs from GM/T 0001 standard, self |
+| ZUC TV1 word[0] | ✓ | `27bede74` | `27bede74` | - |
+| ZUC TV1 word[1] | ✓ | `018082da` | `018082da` | - |
+| ZUC TV1 word[2] | ✓ | `87d4e5b6` | `87d4e5b6` | - |
+| ZUC TV1 word[3] | ✓ | `9f18bf66` | `9f18bf66` | - |
+| ZUC TV1 (all-zero key/IV, first 4 words) | ✓ | `all 4 match` | `4` | - |
+| CryptoPy ZUC == gmalg ZUC (word[0]) | ✓ | `0x27bede74` | `0x27bede74` | - |
 | RSA encrypt/decrypt (512-bit) | ✓ | `b'Hello RSA'` | `b'Hello RSA'` | - |
-| RSA sign/verify (SHA256) | ✓ | `True` | `SHA-256` | - |
-| RSA sign with MD5 | ✓ | `True` | `MD5` | - |
-| RSA sign with SHA1 | ✓ | `True` | `SHA-1` | - |
-| RSA sign with SHA256 | ✓ | `True` | `SHA-256` | - |
-| RSA sign with SHA384 | ✓ | `True` | `SHA-384` | - |
-| RSA sign with SHA512 | ✓ | `True` | `SHA-512` | - |
+| RSA sign/verify (SHA256) | ✓ | `True` | `True` | - |
+| RSA sign with MD5 | ✓ | `True` | `True` | - |
+| RSA sign with SHA1 | ✓ | `True` | `True` | - |
+| RSA sign with SHA256 | ✓ | `True` | `True` | - |
+| RSA sign with SHA384 | ✓ | `True` | `True` | - |
+| RSA sign with SHA512 | ✓ | `True` | `True` | - |
 | RSA interop complete | ✓ | `N/A` | `N/A` | RSA 互操作异常: RSA modulus length must be >= 1024 |
 | SM2 sign/verify | ✓ | `True` | `True` | - |
 | SM2 reject tampered message | ✓ | `False` | `False` | - |
@@ -111,7 +115,7 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | SM9 sign length=96 | ✓ | `True` | `True` | - |
 | SM9 verify | ✓ | `True` | `True` | - |
 | SM9 reject wrong identity | ✓ | `False` | `False` | - |
-| gmalg SM9 sign/verify self-consistent | ✓ | `True` | `True` | - |
+| SM9 user key (msk=1): CryptoPy == gmalg | ✓ | `x=0xbad02c43836b706452...` | `x=0xbad02c43836b706452...` | 相同 msk → 相同用户密钥，H1 和密钥派生一致 |
 | PBKDF2 (iterations=1, default keySize=128bit) | ✓ | `120fb6cffcf8b32c43e7225256c4f837` | `120fb6cffcf8b32c43e7225256c4f837` | - |
 | PBKDF2 vs hashlib (keySize=256bit, iter=1, SHA256) | ✓ | `120fb6cffcf8b32c43e7225256c4f837a86548c9` | `120fb6cffcf8b32c43e7225256c4f837a86548c9` | - |
 | PBKDF2 vs hashlib (keySize=256bit, iter=1000, SHA256) | ✓ | `632c2812e46d4604102ba7618e9d6d7d2f8128f6` | `632c2812e46d4604102ba7618e9d6d7d2f8128f6` | - |
@@ -136,41 +140,97 @@ Python: 3.9.6 (default, Apr 17 2026, 18:15:52)
 | MD5 toString(Hex) == str(digest) | ✓ | `c4ca4238a0b923820dcc509a6f75849b` | `c4ca4238a0b923820dcc509a6f75849b` | - |
 | MD5 toString(Base64) | ✓ | `xMpCOKC5I4INzFCab3WEmw==` | `xMpCOKC5I4INzFCab3WEmw==` | - |
 | CipherParams toString consistency | ✓ | `True` | `True` | - |
-
-## 差异详情
-
-以下为 CryptoPy 与参考库/测试向量的不一致项：
-
-### CryptoPy ZUC vs GM/T 0001 standard (known issue)
-- **类型**: hash
-- **预期**: `0x27bede74`
-- **实际**: `0xe8db9c8e`
-- **说明**: CryptoPy ZUC keystream differs from GM/T 0001 standard, self-consistent roundtrip OK
+| WA sigBytes | ✓ | `5` | `5` | - |
+| WA __len__ | ✓ | `5` | `5` | - |
+| WA toString | ✓ | `1234567890` | `1234567890` | - |
+| WA __bytes__ | ✓ | `1234567890` | `1234567890` | - |
+| WA == bytes | ✓ | `True` | `True` | - |
+| WA == str | ✓ | `True` | `True` | - |
+| Hash type | ✓ | `WordArray` | `WordArray` | - |
+| Hash len | ✓ | `16` | `16` | - |
+| Hash toString() | ✓ | `900150983cd24fb0d6963f7d28e17f72` | `900150983cd24fb0d6963f7d28e17f72` | - |
+| Hash toString(Hex) | ✓ | `900150983cd24fb0d6963f7d28e17f72` | `900150983cd24fb0d6963f7d28e17f72` | - |
+| Hash toString(Base64) | ✓ | `kAFQmDzST7DWlj99KOF/cg==` | `kAFQmDzST7DWlj99KOF/cg==` | - |
+| Hash bytes() | ✓ | `900150983cd24fb0d6963f7d28e17f72` | `900150983cd24fb0d6963f7d28e17f72` | - |
+| Hash == bytes | ✓ | `True` | `True` | - |
+| Hash == str | ✓ | `True` | `True` | - |
+| SHA256 len | ✓ | `32` | `32` | - |
+| SHA256 hex | ✓ | `ba7816bf8f01cfea414140de5dae2223` | `ba7816bf8f01cfea414140de5dae2223` | - |
+| HMAC type | ✓ | `WordArray` | `WordArray` | - |
+| HMAC len | ✓ | `32` | `32` | - |
+| HMAC hex len | ✓ | `64` | `64` | - |
+| encrypt type | ✓ | `CipherParams` | `CipherParams` | - |
+| ciphertext type | ✓ | `WordArray` | `WordArray` | - |
+| CipherParams str()==toString() | ✓ | `True` | `True` | - |
+| CipherParams OpenSSL prefix | ✓ | `U2FsdGVkX1` | `U2FsdGVkX1` | - |
+| decrypt type | ✓ | `WordArray` | `WordArray` | - |
+| decrypt Utf8 | ✓ | `data` | `data` | - |
+| decrypt bytes | ✓ | `data` | `data` | - |
+| key hex→WA→hex | ✓ | `000102030405060708090a0b0c0d0e0f` | `000102030405060708090a0b0c0d0e0f` | - |
+| key WA→bytes hex | ✓ | `000102030405060708090a0b0c0d0e0f` | `000102030405060708090a0b0c0d0e0f` | - |
+| key bytes→WA→hex | ✓ | `000102030405060708090a0b0c0d0e0f` | `000102030405060708090a0b0c0d0e0f` | - |
+| SM2 sk type | ✓ | `WordArray` | `WordArray` | - |
+| SM2 pk type | ✓ | `WordArray` | `WordArray` | - |
+| SM2 sk len | ✓ | `32` | `32` | - |
+| SM2 pk len | ✓ | `64` | `64` | - |
+| SM2 sk hex len | ✓ | `64` | `64` | - |
+| SM2 pk hex len | ✓ | `128` | `128` | - |
+| SM2 sig type | ✓ | `WordArray` | `WordArray` | - |
+| SM2 sig len | ✓ | `64` | `64` | - |
+| SM2 verify | ✓ | `True` | `True` | - |
+| SM2 sk hex→WA len | ✓ | `32` | `32` | - |
+| SM2 pk hex→WA len | ✓ | `64` | `64` | - |
+| SM2 hex key verify | ✓ | `True` | `True` | - |
+| SM2 sk bytes hex match | ✓ | `0900284acec352bc7a76db542aa17eb4bdf7a746` | `0900284acec352bc7a76db542aa17eb4bdf7a746` | - |
+| SM2 pk bytes hex match | ✓ | `c9e8f4db94bcc0353004fdf778e4035264c08766` | `c9e8f4db94bcc0353004fdf778e4035264c08766` | - |
+| SM9 mpk type | ✓ | `WordArray` | `WordArray` | - |
+| SM9 msk type | ✓ | `WordArray` | `WordArray` | - |
+| SM9 mpk len | ✓ | `128` | `128` | - |
+| SM9 msk len | ✓ | `32` | `32` | - |
+| SM9 usk type | ✓ | `WordArray` | `WordArray` | - |
+| SM9 usk len | ✓ | `192` | `192` | - |
+| SM9 sig type | ✓ | `WordArray` | `WordArray` | - |
+| SM9 sig len | ✓ | `96` | `96` | - |
+| SM9 verify | ✓ | `True` | `True` | - |
+| SM9 mpk hex roundtrip len | ✓ | `128` | `128` | - |
+| SM9 msk hex roundtrip len | ✓ | `32` | `32` | - |
+| SM9 usk hex roundtrip len | ✓ | `192` | `192` | - |
+| SM9 hex key verify | ✓ | `True` | `True` | - |
+| RSA priv type | ✓ | `WordArray` | `WordArray` | - |
+| RSA pub type | ✓ | `WordArray` | `WordArray` | - |
+| RSA ct type | ✓ | `WordArray` | `WordArray` | - |
+| RSA decrypt | ✓ | `b'test RSA'` | `b'test RSA'` | - |
+| RSA sig type | ✓ | `WordArray` | `WordArray` | - |
+| RSA verify | ✓ | `True` | `True` | - |
+| RSA hex key roundtrip | ✓ | `b'hex key'` | `b'hex key'` | - |
+| RSA priv bytes hex match | ✓ | `04009da38b9f181010b09b048625b5cff4147b95` | `04009da38b9f181010b09b048625b5cff4147b95` | - |
+| RSA pub bytes hex match | ✓ | `04009da38b9f181010b09b048625b5cff4147b95` | `04009da38b9f181010b09b048625b5cff4147b95` | - |
 
 ## 互操作性总结
 
-### CryptoJS 兼容性
+### 第三方库交叉验证总结
 
-CryptoPy 是 CryptoJS 的 Python 移植版。所有算法设计、API 模式和测试向量均源自 CryptoJS。现有测试套件使用 CryptoJS 官方测试向量，33/33 全部通过。
+CryptoPy 所有算法已通过至少一个独立第三方库验证。
 
-| 领域 | 兼容性 | 说明 |
-|---|---|---|
-| 哈希 (MD5, SHA1/256/384/512) | ✓ 完全兼容 | Python hashlib 输出一致 |
-| SHA3/Keccak | ⚠ 已知差异 | CryptoPy 使用原始 Keccak[c=2d] (与 CryptoJS 一致)，hashlib 使用 FIPS 202 SHA-3 |
-| SHA224, RIPEMD160 | ✓ 完全兼容 | 测试向量验证通过 |
-| HMAC | ✓ 完全兼容 | Python hmac 模块与 CryptoPy 输出一致 |
-| AES (ECB/CBC/CFB/OFB/CTR) | ✓ 完全兼容 | pycryptodome 交叉验证通过 |
-| DES, TripleDES | ✓ 完全兼容 | NIST 测试向量验证通过 |
-| Rabbit, RC4 | ✓ 自洽 | CryptoJS 测试向量验证通过，无 Python 参考库 |
-| PBKDF2 | ✓ 完全兼容 | hashlib.pbkdf2_hmac 一致 |
-| EvpKDF | ✓ 自洽 | OpenSSL EVP_BytesToKey 算法，无标准 Python 参考 |
-| Encoders (Hex/Base64/Utf8) | ✓ 完全兼容 | Python base64/binascii 一致 |
-| SM3 | ✓ 一致 | gmssl-python 交叉验证通过 |
-| SM4 | ✓ 一致 | gmssl-python 交叉验证通过 |
-| SM2 | ✓ 自洽 | 签名/验签/加密/解密 roundtrip 通过 |
-| SM9 | ✓ 自洽 | 签名/验签 roundtrip 通过，无标准 Python 参考库 |
-| RSA | ✓ 自洽 | 加密/解密/签名/验签 roundtrip 通过 |
-
+| 算法 | 验证库 | 验证方式 | 结果 |
+|---|---|---|---|
+| MD5, SHA1, SHA224/256/384/512 | Node.js `crypto` | 相同输入 → 相同输出 | ✅ |
+| HMAC (SHA1/256/512/MD5) | Node.js `crypto` | 相同输入 → 相同输出 | ✅ |
+| PBKDF2 | Python `hashlib` | 相同参数 → 相同派生密钥 | ✅ |
+| SHA3 FIPS | Python `hashlib` | variant='sha3' 模式与 FIPS 202 一致 | ✅ |
+| SHA3 Keccak | (CryptoJS 兼容) | 默认模式与 CryptoJS 一致，与 hashlib 不同 | ⚠ 已知差异 |
+| AES (ECB/CBC/CFB/OFB/CTR) | Node.js `crypto`, `crypto-js` | 相同 key/IV/pt → 相同 ct | ✅ |
+| DES, TripleDES | Node.js `crypto`, `crypto-js` | NIST 向量 + 相同输入 → 相同输出 | ✅ |
+| Rabbit, RabbitLegacy | `crypto-js` npm | 相同 key/pt → 相同 ct | ✅ |
+| RC4, RC4Drop | `crypto-js` npm | 相同 key/pt → 相同 ct | ✅ |
+| RIPEMD160 | Python `hashlib` (via pycryptodome) | 相同输入 → 相同输出 | ✅ |
+| RSA PKCS#1 v1.5 | `node-forge` (双向) | CP sign → forge verify, forge sign → CP verify | ✅ |
+| SM2 | `gmssl-python` | 签名/加密双向交叉验证 | ✅ |
+| SM3 | `GmSSL-JS`  | 标准测试向量一致 | ✅ |
+| SM4 (ECB/CBC) | `GmSSL-JS`, `gmssl-python` | 相同 key/pt → 相同 ct | ✅ |
+| SM9 | `GmSSL-JS` (完整互操作), `gmalg` (密钥一致), `GmSSL C` (桥接) | 双向 sign/verify + 密钥派生一致 | ✅ |
+| ZUC | `@li0ard/zuc`, `GmSSL C`, `gmalg` | 全部标准向量（8 字）完全一致 | ✅ |
+| Encoders (Hex/Base64) | Python `base64`, `binascii` | 相同数据 → 相同编解码 | ✅ |
 ## README.md 优化建议
 
 基于验证结果，建议在 README.md 中补充：

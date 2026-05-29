@@ -87,17 +87,34 @@ class Base:
 
 
 class WordArray(Base):
-    """
-    Array of big-endian 32-bit words representing a byte sequence.
-
-    Byte layout: byte i is stored in words[i>>2], occupying the
-    (24 - (i%4)*8) .. (31 - (i%4)*8) bit range (big-endian within word).
-
+    """CryptoJS-style WordArray: array of 32-bit words + sigBytes count.
+    
     Attributes:
-        words (list[int]): 32-bit words.
+        words (list[int]): 32-bit unsigned integers.
         sigBytes (int): number of significant bytes (may be < 4*len(words)).
     """
-
+    
+    def __len__(self):
+        return self.sigBytes
+    
+    def __bytes__(self):
+        result = bytearray()
+        for i in range(self.sigBytes):
+            word_idx = i // 4
+            byte_idx = 3 - (i % 4)
+            if word_idx < len(self.words):
+                result.append((self.words[word_idx] >> (byte_idx * 8)) & 0xff)
+        return bytes(result)
+    
+    def __eq__(self, other):
+        if isinstance(other, WordArray):
+            return bytes(self) == bytes(other)
+        if isinstance(other, bytes):
+            return bytes(self) == other
+        if isinstance(other, str):
+            return self.toString() == other
+        return NotImplemented
+    
     def init(self, words=None, sigBytes=None):
         words = words or []
         self.words = [w & 0xFFFFFFFF for w in words]
@@ -189,9 +206,17 @@ class BufferedBlockAlgorithm(Base):
         self._nDataBytes = 0
 
     def _append(self, data):
-        """Append data (str or WordArray) to the internal buffer."""
+        """Append data (str, bytes, or WordArray) to the internal buffer."""
         if isinstance(data, str):
             data = Utf8.parse(data)
+        elif isinstance(data, (bytes, bytearray)):
+            words = []
+            for i in range(0, len(data), 4):
+                chunk = data[i:i + 4]
+                if len(chunk) < 4:
+                    chunk += b'\x00' * (4 - len(chunk))
+                words.append(int.from_bytes(chunk, 'big'))
+            data = WordArray.create(words, len(data))
         self._data.concat(data)
         self._nDataBytes += data.sigBytes
 

@@ -14,40 +14,97 @@ Python 密码学算法库，零外部依赖。涵盖摘要算法（MD5, SHA-1/25
 pip install crypto4py
 ```
 
+## 数据类型
+
+CryptoPy 使用 **WordArray**（32 位字数组 + 字节数）作为通用二进制数据类型，与 crypto-js 完全一致。
+
+### 类型转换表
+
+| 从 → 到 | 代码 | 说明 |
+|-----------|------|------|
+| `str` → WordArray | `enc.Utf8.parse(s)` | `enc.Utf8.parse("Hello")` |
+| `hex` → WordArray | `enc.Hex.parse(h)` | `enc.Hex.parse("48656c6c6f")` |
+| `bytes` → WordArray | 使用 `bytes_to_wa(b)` | 每 4 字节一个 word |
+| WordArray → `str` | `wa.toString(enc.Utf8)` | `"Hello"` |
+| WordArray → `hex` | `wa.toString()` 或 `str(wa)` | `"48656c6c6f"` |
+| WordArray → `Base64` | `wa.toString(enc.Base64)` | `"SGVsbG8="` |
+| WordArray → `bytes` | `bytes(wa)` | 原始字节 |
+| WordArray 长度 | `len(wa)` | 字节数 |
+
+### 完整 WordArray 示例
+
+```python
+# 从不同来源创建 WordArray
+from_hex = CryptoPy.enc.Hex.parse("48656c6c6f")
+from_utf8 = CryptoPy.enc.Utf8.parse("Hello")
+from_b64 = CryptoPy.enc.Base64.parse("SGVsbG8=")
+
+# bytes → WordArray（每 4 字节一个 32 位字）
+def bytes_to_wa(b):
+    words = [int.from_bytes(b[i:i+4], 'big') for i in range(0, len(b), 4)]
+    return CryptoPy.lib.WordArray.create(words, len(b))
+
+wa = bytes_to_wa(b"Hello")
+
+# 输出转换
+from_hex.toString()                                # "48656c6c6f"
+from_hex.toString(CryptoPy.enc.Base64)              # "SGVsbG8="
+from_hex.toString(CryptoPy.enc.Utf8)               # "Hello"
+bytes(from_hex)                                     # 原始字节
+
+# 属性
+len(from_hex)      # 5
+from_hex.words     # [0x48656c6c, 0x6f000000]
+from_hex.sigBytes  # 5
+```
+
 ## 快速开始
 
 ```python
 import CryptoPy
+# or: from CryptoPy import AES, MD5, SHA256, SM2, RSA, enc, mode, pad
 
-# 哈希
+# ── 哈希 ──
 digest = CryptoPy.MD5("Message")
-print(digest)                                   # hex 字符串
+print(digest)                                   # hex
 print(digest.toString(CryptoPy.enc.Base64))     # Base64
-print(digest.toString(CryptoPy.enc.Hex))        # 显式 Hex
+print(bytes(digest).hex())                      # 原始字节
 
+CryptoPy.SHA1("Message")
 CryptoPy.SHA256("Message")
 CryptoPy.SHA3("Message", {"outputLength": 256})
+CryptoPy.SM3("SM3 message")
 
-# HMAC
-CryptoPy.HmacSHA256("Message", "Secret Key")
+# ── HMAC ──
+tag = CryptoPy.HmacSHA256("Message", "Secret Key")
+print(tag.toString(CryptoPy.enc.Base64))
 
-# AES 加密/解密
+# ── AES 加密（密码模式）──
 enc = CryptoPy.AES.encrypt("My secret data", "password")
 dec = CryptoPy.AES.decrypt(enc, "password")
-print(CryptoPy.enc.Utf8.stringify(dec))  # "My secret data"
+print(CryptoPy.enc.Utf8.stringify(dec))
 
-# 自定义 Key 和 IV
+# ── AES 加密（自定义 Key/IV）──
 key = CryptoPy.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
 iv  = CryptoPy.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
 enc = CryptoPy.AES.encrypt("Message", key, {"iv": iv})
 dec = CryptoPy.AES.decrypt(enc, key, {"iv": iv})
 
-# 渐进式哈希
+# ── SM4（与 AES 相同模式）──
+enc = CryptoPy.SM4.encrypt("plaintext", "password")
+dec = CryptoPy.SM4.decrypt(enc, "password")
+
+# ── 编码器 ──
+words = CryptoPy.enc.Hex.parse("48656c6c6f")
+print(CryptoPy.enc.Base64.stringify(words))      # "SGVsbG8="
+print(words.toString(CryptoPy.enc.Utf8))         # "Hello"
+
+# ── 渐进式哈希 ──
 sha256 = CryptoPy.algo.SHA256.create()
 sha256.update("Part 1").update("Part 2")
 sha256.finalize("Part 3")
 
-# 渐进式 HMAC
+# ── 渐进式 HMAC ──
 hmac = CryptoPy.algo.HMAC.create(CryptoPy.algo.SHA256, "key")
 hmac.update("Part 1").update("Part 2")
 hmac.finalize()
@@ -57,71 +114,192 @@ hmac.finalize()
 
 ### 哈希算法
 
+所有哈希函数接受 `str`, `bytes`, 或 `WordArray`，返回 **WordArray**。
+
+| 函数 | 返回 | 默认输出 | 示例 |
+|----------|--------|---------|---------|
+| `CryptoPy.MD5(s)` | **WordArray** | hex | `CryptoPy.MD5("abc")` |
+| `CryptoPy.SHA1(s)` | **WordArray** | hex | |
+| `CryptoPy.SHA256(s)` | **WordArray** | hex | |
+| `CryptoPy.SHA224(s)` | **WordArray** | hex | |
+| `CryptoPy.SHA384(s)` | **WordArray** | hex | |
+| `CryptoPy.SHA512(s)` | **WordArray** | hex | |
+| `CryptoPy.SHA3(s, cfg)` | **WordArray** | hex | `{"outputLength":256}` |
+| `CryptoPy.RIPEMD160(s)` | **WordArray** | hex | |
+| `CryptoPy.SM3(s)` | **WordArray** | hex | |
+
 ```python
-CryptoPy.MD5("message")
-CryptoPy.SHA1("message")
-CryptoPy.SHA256("message")
-CryptoPy.SHA224("message")
-CryptoPy.SHA384("message")
-CryptoPy.SHA512("message")
-CryptoPy.SHA3("message", {"outputLength": 256})  # 224/256/384/512
-CryptoPy.RIPEMD160("message")
-```
+digest = CryptoPy.SHA256("message")
+digest = CryptoPy.SHA256(b"message")             # bytes 自动转换
 
-> **注意**：`SHA3` 实现的是原始 Keccak[c=2d]（与 CryptoJS 一致），而非 FIPS 202 标准的 SHA-3。两者的区别在于填充前的域分隔字节不同。标准 `hashlib.sha3_512()` 的输出与此不同。
+# 输出转换
+digest.toString()                               # hex
+digest.toString(CryptoPy.enc.Base64)            # Base64
+bytes(digest)                                   # 32 字节
+len(digest)                                     # 32
 
-### toString 编码输出
-
-```python
-digest = CryptoPy.MD5("1")
-print(digest)                                          # hex: c4ca4238...
-print(digest.toString(CryptoPy.enc.Hex))               # hex: c4ca4238...
-print(digest.toString(CryptoPy.enc.Base64))            # Base64: xMpCOKC5...
-print(digest.toString(CryptoPy.enc.Latin1))            # Latin1 字符串
-
-enc = CryptoPy.AES.encrypt("msg", "pass")
-print(enc.toString(CryptoPy.enc.Hex))                  # 密文的 Hex
-print(enc.toString(CryptoPy.enc.Base64))               # 密文的 Base64
-print(enc.toString(CryptoPy.format.OpenSSL))           # OpenSSL 格式（默认）
+# 渐进式
+sha256 = CryptoPy.algo.SHA256.create()
+sha256.update("chunk 1").update("chunk 2")
+digest = sha256.finalize("chunk 3")
 ```
 
 ### HMAC
 
+| 函数 | 返回 | 默认 |
+|----------|--------|---------|
+| `HmacMD5("m","k")` | **WordArray** | hex |
+| `HmacSHA1("m","k")` | **WordArray** | hex |
+| `HmacSHA256("m","k")` | **WordArray** | hex |
+| `HmacSHA384("m","k")` | **WordArray** | hex |
+| `HmacSHA512("m","k")` | **WordArray** | hex |
+| `HmacSM3("m","k")` | **WordArray** | hex |
+
 ```python
-CryptoPy.HmacMD5("message", "key")
-CryptoPy.HmacSHA1("message", "key")
-CryptoPy.HmacSHA256("message", "key")
-CryptoPy.HmacSHA224("message", "key")
-CryptoPy.HmacSHA384("message", "key")
-CryptoPy.HmacSHA512("message", "key")
-CryptoPy.HmacSHA3("message", "key")
-CryptoPy.HmacRIPEMD160("message", "key")
+tag = CryptoPy.HmacSHA256("message", "secret key")
+tag.toString()                                # hex
+tag.toString(CryptoPy.enc.Base64)             # Base64
+bytes(tag)                                    # 32 字节
+len(tag)                                      # 32
+
+# bytes 输入
+tag = CryptoPy.HmacSHA256(b"message", b"key")
+
+# WordArray 密钥
+key_wa = CryptoPy.enc.Hex.parse("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")
+tag = CryptoPy.HmacSHA256("message", key_wa)
 
 # 渐进式
 hmac = CryptoPy.algo.HMAC.create(CryptoPy.algo.SHA256, "key")
-hmac.update("Part 1")
-hmac.finalize("Part 2")
+hmac.update("part1").update("part2")
+tag = hmac.finalize("part3")
 ```
 
-### 加密算法
+### 对称加密
+
+| 算法 | 类型 | 密钥长度 | 分组大小 |
+|--------|------|----------|------------|
+| `AES` | Block | 128/192/256 bits | 16 bytes |
+| `DES` | Block | 64 bits | 8 bytes |
+| `TripleDES` | Block | 128/192 bits | 8 bytes |
+| `SM4` | Block | 128 bits | 16 bytes |
+| `Rabbit` | Stream | 128 bits | — |
+| `RC4` | Stream | 40-2048 bits | — |
+| `ZUC` | Stream | 128 bits | — |
 
 ```python
-CryptoPy.AES.encrypt("message", "password")
-CryptoPy.AES.decrypt(encrypted, "password")
-CryptoPy.DES.encrypt("message", "password")
-CryptoPy.TripleDES.encrypt("message", "password")
-CryptoPy.Rabbit.encrypt("message", "password")
-CryptoPy.RC4.encrypt("message", "password")
+# 密码模式
+enc = CryptoPy.AES.encrypt("plaintext", "password")
+dec = CryptoPy.AES.decrypt(enc, "password")
+str(enc)                                      # OpenSSL 格式
+dec.toString(CryptoPy.enc.Utf8)               # 原文
+
+# 自定义 Key/IV
+key = CryptoPy.enc.Hex.parse("000102030405060708090a0b0c0d0e0f")
+iv  = CryptoPy.enc.Hex.parse("101112131415161718191a1b1c1d1e1f")
+enc = CryptoPy.AES.encrypt("message", key, {"iv": iv, "mode": CryptoPy.mode.CBC})
+dec = CryptoPy.AES.decrypt(enc, key, {"iv": iv, "mode": CryptoPy.mode.CBC})
+
+# SM4
+enc = CryptoPy.SM4.encrypt("message", "password")
+dec = CryptoPy.SM4.decrypt(enc, "password")
+
+# DES / TripleDES
+key = CryptoPy.enc.Hex.parse("0123456789abcdef")
+enc = CryptoPy.DES.encrypt("plaintext", key, {"mode": CryptoPy.mode.ECB})
+dec = CryptoPy.DES.decrypt(enc, key, {"mode": CryptoPy.mode.ECB})
+
+key3 = CryptoPy.enc.Hex.parse("0123456789abcdef0123456789abcdef")
+enc = CryptoPy.TripleDES.encrypt("plaintext", key3, {"mode": CryptoPy.mode.ECB})
+dec = CryptoPy.TripleDES.decrypt(enc, key3, {"mode": CryptoPy.mode.ECB})
+
+# 流密码 (Rabbit, RC4, ZUC)
+enc = CryptoPy.Rabbit.encrypt("message", "password")
+dec = CryptoPy.Rabbit.decrypt(enc, "password")
 ```
 
-### 块密码模式
+| 操作 | 返回 | `str()` | `bytes()` |
+|-----------|--------|---------|-----------|
+| `AES.encrypt("m","p")` | **CipherParams** | OpenSSL | ❌ |
+| `AES.decrypt(enc,"p")` | **WordArray** | hex | 原文 bytes |
+
+### SM2 — 公钥密码 (GM/T 0003-2012)
 
 ```python
-CryptoPy.mode.CBC   # 默认
-CryptoPy.mode.ECB
-CryptoPy.mode.CFB
-CryptoPy.mode.OFB
-CryptoPy.mode.CTR
+# 密钥生成
+sk, pk = CryptoPy.SM2.generate_keypair()     # → (WordArray, WordArray)
+sk.toString()                                 # 64 hex chars
+pk.toString()                                 # 128 hex chars
+
+# 签名/验签
+sig = CryptoPy.SM2.sign("message", sk)        # → WordArray
+assert CryptoPy.SM2.verify("message", sig, pk)
+
+# 加密/解密
+ct = CryptoPy.SM2.encrypt("secret data", pk)  # → WordArray
+pt = CryptoPy.SM2.decrypt(ct, sk)            # → bytes
+
+# 密钥持久化（hex 存储）
+sk_hex = sk.toString()
+pk_hex = pk.toString()
+sk2 = CryptoPy.enc.Hex.parse(sk_hex)
+pk2 = CryptoPy.enc.Hex.parse(pk_hex)
+sig2 = CryptoPy.SM2.sign("new msg", sk2)
+assert CryptoPy.SM2.verify("new msg", sig2, pk2)
+```
+
+### SM9 — 标识密码 (GM/T 0044-2016)
+
+```python
+# 主密钥
+mpk, msk = CryptoPy.SM9.setup()              # → (WordArray, WordArray)
+
+# 用户密钥派生
+usk = CryptoPy.SM9.generate_user_key(msk, b"alice@example.com")
+
+# 签名/验签
+sig = CryptoPy.SM9.sign(b"message", usk)      # → WordArray
+ok  = CryptoPy.SM9.verify(b"message", sig, mpk, b"alice@example.com")
+```
+
+### RSA — 非对称加密 (PKCS#1 v1.5)
+
+```python
+# 密钥生成
+priv, pub = CryptoPy.RSA.generate_keypair(2048)
+
+# 加密/解密
+ct = CryptoPy.RSA.encrypt("message", pub)     # → WordArray
+pt = CryptoPy.RSA.decrypt(ct, priv)          # → bytes
+
+ct.toString()                                 # 密文 hex
+bytes(ct)                                     # 密文 bytes
+
+# 签名/验签
+sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)  # → WordArray
+ok  = CryptoPy.RSA.verify("message", sig, pub)  # True / raises Error
+
+# 密钥持久化
+priv_hex = priv.toString()
+pub_hex = pub.toString()
+priv2 = CryptoPy.enc.Hex.parse(priv_hex)
+pub2 = CryptoPy.enc.Hex.parse(pub_hex)
+```
+
+### 密钥派生
+
+```python
+# PBKDF2
+key = CryptoPy.PBKDF2("password", "salt", {
+    "keySize": 256 // 32,
+    "iterations": 10000,
+})
+key.toString()                                # hex
+key.toString(CryptoPy.enc.Base64)             # Base64
+bytes(key)                                    # 密钥原始字节
+
+# EvpKDF
+key = CryptoPy.EvpKDF("password", "salt")
 ```
 
 ### 填充方案
@@ -148,88 +326,14 @@ CryptoPy.enc.Utf16.parse("Hello")
 CryptoPy.enc.Utf16LE.parse("Hello")
 ```
 
-### 中国国家密码算法（商密）
-
-#### SM3 — 哈希 (GM/T 0004-2012)
+### 哈希枚举（用于 RSA.sign）
 
 ```python
-CryptoPy.SM3("message")  # 256 位哈希
-```
-
-中国国家密码标准哈希算法，安全等级等同 SHA-256。
-
-#### SM4 — 分组密码 (GM/T 0002-2012)
-
-```python
-CryptoPy.SM4.encrypt("message", "password")
-CryptoPy.SM4.decrypt(encrypted, "password")
-```
-
-128 位分组密码，32 轮迭代。在中国商用密码中替换 AES。
-
-#### ZUC — 序列密码 (GM/T 0001-2012)
-
-```python
-CryptoPy.ZUC.encrypt("message", "password")
-CryptoPy.ZUC.decrypt(encrypted, "password")
-```
-
-128 位流密码，4G/5G 移动通信标准核心算法。
-
-#### SM2 — 公钥密码 (GM/T 0003-2012)
-
-```python
-sk, pk = CryptoPy.SM2.generate_keypair()
-sig = CryptoPy.SM2.sign(sk, "message")
-assert CryptoPy.SM2.verify(pk, "message", sig)
-ct = CryptoPy.SM2.encrypt(pk, "secret")
-pt = CryptoPy.SM2.decrypt(sk, ct)
-```
-
-256 位椭圆曲线公钥密码，支持数字签名、密钥交换、数据加密。在中国标准中替换 RSA。
-
-#### SM9 — 标识密码 (GM/T 0044-2016)
-
-```python
-mpk, msk = CryptoPy.SM9.setup()
-usk = CryptoPy.SM9.generate_user_key(msk, "alice@example.com")
-sig = CryptoPy.SM9.sign(usk, "message")
-CryptoPy.SM9.verify(mpk, "alice@example.com", "message", sig)
-```
-
-基于身份标识的签名系统，无需公钥证书，直接从用户标识（邮箱、手机号等）派生密钥。基于 BN 曲线上的 R-ate 配对实现，零外部依赖。从 GmSSL 移植。
-
-| 输出 | 长度 | 格式 |
-|------|------|------|
-| `mpk` | 128 字节 | `X.a0 \|\| X.a1 \|\| Y.a0 \|\| Y.a1` (G₂ 仿射) |
-| `msk` | 32 字节 | 标量 mod N |
-| `usk` | 192 字节 | `usk.X \|\| usk.Y (G₁ 仿射) \|\| mpk` |
-| `sig` | 96 字节 | `h \|\| S.X \|\| S.Y` |
-
-```python
-mpk.hex()   # -> "hex字符串"  (128 bytes → 256 chars)
-msk.hex()   # -> "hex字符串"  (32 bytes → 64 chars)
-usk.hex()   # -> "hex字符串"  (192 bytes → 384 chars)
-```
-
-#### RSA — 非对称加密 (PKCS#1 v1.5)
-
-```python
-priv, pub = CryptoPy.RSA.generate_keypair(2048)
-ct = CryptoPy.RSA.encrypt("message", pub)
-pt = CryptoPy.RSA.decrypt(ct, priv)
-sig = CryptoPy.RSA.sign("message", priv, CryptoPy.hash.SHA256)
-ok  = CryptoPy.RSA.verify("message", sig, pub)
-```
-
-RSA 公钥密码体制，支持 PKCS#1 v1.5 填充方案。签名支持 MD5、SHA-1、SHA-256、SHA-384、SHA-512。使用中国剩余定理加速解密。零外部依赖。
-
-### 密钥派生
-
-```python
-CryptoPy.PBKDF2("password", "salt")
-CryptoPy.PBKDF2("password", "salt", {"keySize": 256//32, "iterations": 10000})
-CryptoPy.EvpKDF("password", "salt")
+CryptoPy.hash.MD5     # "MD5"
+CryptoPy.hash.SHA1    # "SHA-1"
+CryptoPy.hash.SHA256  # "SHA-256"
+CryptoPy.hash.SHA384  # "SHA-384"
+CryptoPy.hash.SHA512  # "SHA-512"
 ```
 
 ## 实际应用场景
@@ -242,49 +346,85 @@ import CryptoPy
 with open("file.bin", "rb") as f:
     data = f.read()
 
-wa = CryptoPy.lib.WordArray.create(list(data), len(data))
-print("SHA256:", CryptoPy.SHA256(wa))
+digest = CryptoPy.SHA256(data)                # bytes 自动转换
+print("SHA256:", digest)
+print("SHA256 Base64:", digest.toString(CryptoPy.enc.Base64))
 ```
 
-### 密码哈希存储
+### HMAC API 认证
 
 ```python
 import CryptoPy
+
+secret = "api-secret-key"
+message = "user=alice&time=12345"
+token = CryptoPy.HmacSHA256(message, secret)
+print("Token:", token.toString(CryptoPy.enc.Base64))
+```
+
+### PBKDF2 + AES 组合加密
+
+```python
+import CryptoPy, json
 
 salt = CryptoPy.lib.WordArray.random(16)
-key = CryptoPy.PBKDF2("user_password", salt, {
-    "keySize": 256 // 32,
-    "iterations": 10000,
+aes_key = CryptoPy.PBKDF2("my password", salt, {
+    "keySize": 256 // 32, "iterations": 10000,
 })
-print("Derived key:", key.toString(CryptoPy.enc.Base64))
+iv = CryptoPy.lib.WordArray.random(16)
+ct = CryptoPy.AES.encrypt("Sensitive data", aes_key, {"iv": iv})
+
+stored = json.dumps({
+    "salt": salt.toString(),
+    "iv": iv.toString(),
+    "ct": str(ct),
+})
 ```
 
-### 文件加密
+### SM2 密钥持久化
 
 ```python
 import CryptoPy
 
-enc = CryptoPy.AES.encrypt("Sensitive data", "password")
-with open("secret.enc", "w") as f:
-    f.write(str(enc))
+sk, pk = CryptoPy.SM2.generate_keypair()
+with open("sm2_private.key", "w") as f:
+    f.write(sk.toString())
+with open("sm2_public.key", "w") as f:
+    f.write(pk.toString())
 
-with open("secret.enc") as f:
-    data = f.read()
-dec = CryptoPy.AES.decrypt(data, "password")
-print(CryptoPy.enc.Utf8.stringify(dec))
+sk2 = CryptoPy.enc.Hex.parse(open("sm2_private.key").read())
+pk2 = CryptoPy.enc.Hex.parse(open("sm2_public.key").read())
+sig = CryptoPy.SM2.sign("test", sk2)
+assert CryptoPy.SM2.verify("test", sig, pk2)
 ```
 
-### 大文件流式哈希
+### SM9 身份签名
 
 ```python
 import CryptoPy
 
-sha256 = CryptoPy.algo.SHA256.create()
-with open("largefile.bin", "rb") as f:
-    for chunk in iter(lambda: f.read(8192), b""):
-        wa = CryptoPy.lib.WordArray.create(list(chunk), len(chunk))
-        sha256.update(wa)
-print("File SHA256:", sha256.finalize())
+mpk, msk = CryptoPy.SM9.setup()
+usk = CryptoPy.SM9.generate_user_key(msk, b"alice@company.com")
+
+doc = b"Contract #1234 - Payment approved"
+sig = CryptoPy.SM9.sign(doc, usk)
+ok = CryptoPy.SM9.verify(doc, sig, mpk, b"alice@company.com")
+print(f"Signature valid: {ok}")
+```
+
+### RSA 文件加密
+
+```python
+import CryptoPy
+
+priv, pub = CryptoPy.RSA.generate_keypair(2048)
+ct = CryptoPy.RSA.encrypt(b"Secret message", pub)
+with open("rsa_encrypted.bin", "wb") as f:
+    f.write(bytes(ct))
+
+ct_data = open("rsa_encrypted.bin", "rb").read()
+pt = CryptoPy.RSA.decrypt(ct_data, priv)
+print("Decrypted:", pt)
 ```
 
 ### 跨语言互操作 (CryptoJS ↔ CryptoPy)
@@ -314,44 +454,29 @@ print(CryptoPy.enc.Utf8.stringify(dec))
 | `CryptoJS.enc.Utf8.parse("s")` | `CryptoPy.enc.Utf8.parse("s")` |
 | `CryptoJS.lib.WordArray.create([...])` | `CryptoPy.lib.WordArray.create([...])` |
 | `CryptoJS.algo.SHA256.create()` | `CryptoPy.algo.SHA256.create()` |
-| `CryptoJS.algo.HMAC.create(...)` | `CryptoPy.algo.HMAC.create(...)` |
 | `CryptoJS.mode.CBC` | `CryptoPy.mode.CBC` |
 | `CryptoJS.pad.Pkcs7` | `CryptoPy.pad.Pkcs7` |
-| `CryptoJS.format.OpenSSL` | `CryptoPy.format.OpenSSL` |
+| `CryptoJS.kdf.OpenSSL.execute(...)` | `CryptoPy.kdf.OpenSSL.execute(...)` |
+| `CryptoJS.PBKDF2("p","s")` | `CryptoPy.PBKDF2("p","s")` |
+| `CryptoJS.lib.WordArray.random(16)` | `CryptoPy.lib.WordArray.random(16)` |
 
 ## 开发
 
 ```bash
-# 运行测试
 PYTHONPATH=src python3 tests/test_all.py
-
-# 打包
 python3 -m build --sdist
-
-# 发布
 python3 -m twine upload dist/*
 ```
 
-## 标准合规与交叉验证
+## 标准合规
 
-103 项交叉验证测试已通过（对比 Python stdlib、pycryptodome、gmssl-python）。完整报告：`demo/cross_validate_report.md`。
+已完成 179 项交叉验证测试，对比以下独立第三方库：
+- **Python**: hashlib, hmac, base64, pycryptodome, gmssl-python, gmalg
+- **JavaScript (npm)**: crypto-js, node-forge, @li0ard/zuc, GmSSL-JS
+- **C**: GmSSL (编译参考实现)
+- **Node.js**: crypto 内置模块
 
-| 算法分类 | 测试向量 | hashlib/hmac | pycryptodome | gmssl-python | 状态 |
-|---|---|---|---|---|---|
-| MD5, SHA-1, SHA-256/384/512 | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
-| SHA224, RIPEMD160 | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
-| SHA3 (Keccak / FIPS) | ✓ | ✓ (sha3) | ✓ (sha3) | N/A | ✅ 两种均支持 |
-| HMAC (全部) | ✓ | ✓ | ✓ | N/A | ✅ 已验证 |
-| AES (ECB/CBC/CFB/OFB/CTR) | ✓ | N/A | ✓ | N/A | ✅ 已验证 |
-| DES, TripleDES | ✓ | N/A | ✓ | N/A | ✅ 已验证 |
-| PBKDF2, EvpKDF | ✓ | ✓ | N/A | N/A | ✅ 已验证 |
-| SM3 | ✓ | N/A | N/A | ✓ | ✅ 已验证 |
-| SM4 | ✓ | N/A | N/A | ✓ | ✅ 已验证 |
-| SM2 | ✓ | N/A | N/A | ✓ | ✅ 交叉验证 |
-| SM9, ZUC | ✓ | N/A | N/A | N/A | ✅ 自洽一致 |
-| RSA (PKCS#1 v1.5) | ✓ | N/A | ✓ | N/A | ✅ 交叉验证 |
-| 渐进式 API | ✓ | N/A | N/A | N/A | ✅ 已验证 |
-| 编码器 (Base64, Hex, Utf8) | ✓ | ✓ | N/A | N/A | ✅ 已验证 |
+完整报告：`demo/cross_validate_report.md`。
 
 ## 参考来源
 
@@ -359,8 +484,13 @@ python3 -m twine upload dist/*
 |----------|------|
 | 基础库 (MD5, SHA, AES 等) | [brix/crypto-js](https://github.com/brix/crypto-js) |
 | RSA (PKCS#1 v1.5) | [sybrenstuvel/python-rsa](https://github.com/sybrenstuvel/python-rsa) |
-| SM2 / SM3 / SM4 / ZUC | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
-| SM9 (R-ate 配对) | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) |
+| SM2 / SM3 / SM4 / SM9 | [guanzhi/GmSSL](https://github.com/guanzhi/GmSSL) (C), [GmSSL-JS](https://github.com/guanzhi/GmSSL-JS) (JS) |
+| SM9 | [gmalg](https://github.com/ww-rm/gmalg) (Python) |
+| ZUC | [@li0ard/zuc](https://github.com/li0ard/zuc) (TS), [gmalg](https://github.com/ww-rm/gmalg) (Python) |
+| RSA | [node-forge](https://github.com/digitalbazaar/forge) (JS), [pycryptodome](https://www.pycryptodome.org) (Python) |
+| AES, DES, TripleDES | Node.js built-in `crypto`, [crypto-js](https://github.com/brix/crypto-js) (JS) |
+| Rabbit, RC4 | [crypto-js](https://github.com/brix/crypto-js) (JS) |
+| SHA1, MD5, HMAC | Node.js built-in `crypto` |
 
 ## 许可证
 
